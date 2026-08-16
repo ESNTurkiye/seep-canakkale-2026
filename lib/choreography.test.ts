@@ -212,6 +212,14 @@ describe('enteringChoreography — the approach fills the viewport', () => {
     assert.equal(enter(0.5).scale, PEAK)
   })
 
+  test('the painting never shrinks below its hung size anywhere on the track', () => {
+    const STEPS = 500
+    for (let i = 0; i <= STEPS; i++) {
+      const scale = enter(i / STEPS).scale
+      assert.ok(scale >= 1 - 1e-9, `scale dipped below the hung size at p=${i / STEPS}: ${scale}`)
+    }
+  })
+
   test('growth is monotonic on the way in — the painting never shrinks during the approach', () => {
     const STEPS = 200
     let previous = enter(0).scale

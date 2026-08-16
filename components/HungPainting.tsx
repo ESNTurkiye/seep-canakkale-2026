@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Artwork as ArtworkType } from '@/content/scenes'
 import { lightMovement } from '@/lib/choreography'
@@ -23,6 +23,13 @@ export function HungPainting({
   const ref = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
 
+  // Static export (ADR-0003): the site must stand on its own before any
+  // script runs. Rendering the scroll-linked style only once mounted keeps
+  // the painting at its natural, fully visible opacity until JS is confirmed
+  // running, rather than shipping it invisible in the static HTML.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'start 0.7'],
@@ -33,7 +40,11 @@ export function HungPainting({
   const y = useTransform(state, (st) => st.translateYPx)
 
   return (
-    <motion.figure ref={ref} className={s.hung} style={{ opacity, y }}>
+    <motion.figure
+      ref={ref}
+      className={s.hung}
+      style={mounted ? { opacity, y } : undefined}
+    >
       <Painting variant="hung" artwork={artwork} available={available} />
     </motion.figure>
   )

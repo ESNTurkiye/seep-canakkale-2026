@@ -30,16 +30,22 @@ export function EnteringScene({
   /**
    * How far the hung painting must be scaled up to fill the viewport at the
    * midpoint of the approach. Measured rather than assumed — see OpeningScene.
+   * Capped: on a tall narrow phone the resting box is short relative to the
+   * viewport height, and covering both edges uncapped would zoom the 16:9
+   * artwork to a sliver rather than a painting filling the view.
    */
   const [peak, setPeak] = useState(1.9)
-  const peakRef = useRef(peak)
-  peakRef.current = peak
 
   useEffect(() => {
     const measure = () => {
       const el = boxRef.current
       if (!el || !el.offsetWidth || !el.offsetHeight) return
-      setPeak(Math.max(window.innerWidth / el.offsetWidth, window.innerHeight / el.offsetHeight))
+      setPeak(
+        Math.min(
+          4.5,
+          Math.max(window.innerWidth / el.offsetWidth, window.innerHeight / el.offsetHeight),
+        ),
+      )
     }
     measure()
     window.addEventListener('resize', measure)
@@ -53,9 +59,9 @@ export function EnteringScene({
 
   // Computed once per frame, then just field-read below, so adding more
   // cinematic scenes doesn't multiply the per-property cost the opening pays.
-  const state = useTransform(scrollYProgress, (p) =>
-    enteringChoreography(p, peakRef.current, !!reduced),
-  )
+  // `peak` is read directly (not via a ref): this transformer function is
+  // recreated on every render, so useTransform always sees the latest value.
+  const state = useTransform(scrollYProgress, (p) => enteringChoreography(p, peak, !!reduced))
   const scale = useTransform(state, (st) => st.scale)
   const labelOpacity = useTransform(state, (st) => st.labelOpacity)
 

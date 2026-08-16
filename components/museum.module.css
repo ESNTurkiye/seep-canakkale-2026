@@ -43,6 +43,14 @@
   overflow: hidden;
 }
 
+/* A later cinematic scene's painting and its label, grouped and centred as
+   one unit — see the comment on Painting's 'entering' variant. */
+.enteringGroup {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+}
+
 /* A later cinematic scene's painting at its hung, resting size — scaled up to
    fill the viewport as it is approached (see EnteringScene). */
 .enteringPainting {
@@ -51,6 +59,11 @@
   max-width: 100%;
   aspect-ratio: 16 / 9;
   transform-origin: center center;
+}
+
+.enteringLabel {
+  text-align: center;
+  white-space: nowrap;
 }
 
 .paintingInner img {

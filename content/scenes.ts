@@ -25,7 +25,10 @@ export type Scene = {
   /**
    * Full scroll choreography (grows to fill the viewport, recedes as it is
    * passed) vs. light movement only — a content decision, not a technical
-   * one. See docs/adr/0005-scroll-choreography.md.
+   * one. See docs/adr/0005-scroll-choreography.md. Only meaningful on a
+   * single-artwork `artwork`/`diptych`/`closing` scene — the opening is
+   * always fully choreographed by virtue of its kind, and typographic and
+   * portrait scenes have no single painting to choreograph.
    */
   cinematic?: boolean
 }
@@ -37,7 +40,6 @@ export const scenes: Scene[] = [
     eyebrow: 'South-Eastern European Platform · 15–18 October 2026',
     headline: 'Some delegations arrive unannounced.',
     body: 'SEEP comes to Çanakkale — fifteen countries, one strait, four days.',
-    cinematic: true,
     artworks: [
       {
         src: '/artwork/opening-trojan-horse.png',
@@ -168,3 +170,12 @@ export const scenes: Scene[] = [
     ],
   },
 ]
+
+for (const scene of scenes) {
+  if (scene.cinematic && scene.artworks.length > 1) {
+    throw new Error(
+      `Scene "${scene.id}" is marked cinematic but has ${scene.artworks.length} artworks — ` +
+        `EnteringScene only renders the first, silently dropping the rest.`,
+    )
+  }
+}

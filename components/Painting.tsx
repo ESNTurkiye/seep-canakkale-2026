@@ -88,17 +88,22 @@ export function Painting(props: PaintingProps) {
   if (props.variant === 'entering') {
     const { boxRef, scale, labelOpacity } = props
     return (
-      <>
+      // Grouped with the label as one unit, rather than the opening's
+      // separately overlaid label: the opening never shows copy and label at
+      // once (see openingChoreography's timing), but an entering scene's copy
+      // is always on screen, so its label travels with the painting instead
+      // of pinning to the viewport bottom where the copy already lives.
+      <div className={s.enteringGroup}>
         <motion.div ref={boxRef} className={s.enteringPainting} style={{ scale }}>
           <div className={s.paintingInner}>
             <Artwork artwork={artwork} available={available} />
           </div>
           <div className={s.frame} />
         </motion.div>
-        <motion.div className={s.label} style={{ opacity: labelOpacity, bottom: '6svh' }}>
+        <motion.div className={s.enteringLabel} style={{ opacity: labelOpacity }}>
           <LabelText artwork={artwork} />
         </motion.div>
-      </>
+      </div>
     )
   }
 
