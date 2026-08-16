@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
 import { openingChoreography } from '@/lib/choreography'
+import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import s from './museum.module.css'
 
@@ -18,6 +19,7 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
   const trackRef = useRef<HTMLElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
+  const trackCollapsed = useResolvedReducedMotion()
 
   /**
    * How far the hung painting must be scaled up to fill the viewport. Measured
@@ -47,30 +49,17 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
     offset: ['start start', 'end end'],
   })
 
-  const scale = useTransform(
-    scrollYProgress,
-    (p) => openingChoreography(p, coverRef.current, !!reduced).scale,
+  // Computed once per frame here, then just field-read below — see the
+  // per-frame cost note on EnteringScene.
+  const state = useTransform(scrollYProgress, (p) =>
+    openingChoreography(p, coverRef.current, !!reduced),
   )
-  const wallOpacity = useTransform(
-    scrollYProgress,
-    (p) => openingChoreography(p, coverRef.current, !!reduced).wallOpacity,
-  )
-  const frameOpacity = useTransform(
-    scrollYProgress,
-    (p) => openingChoreography(p, coverRef.current, !!reduced).frameOpacity,
-  )
-  const frameWidth = useTransform(
-    scrollYProgress,
-    (p) => `${openingChoreography(p, coverRef.current, !!reduced).frameWidthPx}px`,
-  )
-  const copyOpacity = useTransform(
-    scrollYProgress,
-    (p) => openingChoreography(p, coverRef.current, !!reduced).copyOpacity,
-  )
-  const labelOpacity = useTransform(
-    scrollYProgress,
-    (p) => openingChoreography(p, coverRef.current, !!reduced).labelOpacity,
-  )
+  const scale = useTransform(state, (st) => st.scale)
+  const wallOpacity = useTransform(state, (st) => st.wallOpacity)
+  const frameOpacity = useTransform(state, (st) => st.frameOpacity)
+  const frameWidth = useTransform(state, (st) => `${st.frameWidthPx}px`)
+  const copyOpacity = useTransform(state, (st) => st.copyOpacity)
+  const labelOpacity = useTransform(state, (st) => st.labelOpacity)
 
   const artwork = scene.artworks[0]
 
@@ -78,7 +67,7 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
     <section
       ref={trackRef}
       className={s.track}
-      style={{ height: reduced ? '100svh' : '340svh' }}
+      style={{ height: trackCollapsed ? '100svh' : '340svh' }}
       aria-label={scene.headline}
     >
       <div className={s.stage}>

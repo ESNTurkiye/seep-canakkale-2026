@@ -1,6 +1,12 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
-import { openingChoreography, openingRest, type OpeningState } from './choreography.ts'
+import {
+  openingChoreography,
+  openingRest,
+  enteringChoreography,
+  lightMovement,
+  type OpeningState,
+} from './choreography.ts'
 
 // Arbitrary but fixed "cover" — the measured scale the hung painting needs
 // at rest. Real value comes from a DOM measurement; any positive number
@@ -178,6 +184,134 @@ describe('openingChoreography — reduced motion', () => {
   test('every input returns the resting state', () => {
     for (const progress of [-2, 0, 0.3, 0.55, 0.7, 1, 3]) {
       assert.deepEqual(choreograph(progress, true), openingRest)
+    }
+  })
+})
+
+// A later scene, already hung on the wall, approached and passed — see
+// docs/adr/0005-scroll-choreography.md. `peak` is the measured scale the hung
+// painting needs to fill the viewport at the midpoint of its own track.
+const PEAK = 2.4
+
+function enter(progress: number, reducedMotion = false) {
+  return enteringChoreography(progress, PEAK, reducedMotion)
+}
+
+describe('enteringChoreography — at rest, before and after the approach', () => {
+  test('at the start of the track the painting is at its hung, unscaled size', () => {
+    assert.equal(enter(0).scale, 1)
+  })
+
+  test('at the end of the track the painting has receded back to its hung size', () => {
+    assert.equal(enter(1).scale, 1)
+  })
+})
+
+describe('enteringChoreography — the approach fills the viewport', () => {
+  test('at the midpoint the painting has grown to the measured peak scale', () => {
+    assert.equal(enter(0.5).scale, PEAK)
+  })
+
+  test('growth is monotonic on the way in — the painting never shrinks during the approach', () => {
+    const STEPS = 200
+    let previous = enter(0).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = enter((i / STEPS) * 0.5).scale
+      assert.ok(current >= previous - 1e-9, `scale shrank at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+
+  test('recede is monotonic on the way out — the painting never grows again after the peak', () => {
+    const STEPS = 200
+    let previous = enter(0.5).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = enter(0.5 + (i / STEPS) * 0.5).scale
+      assert.ok(current <= previous + 1e-9, `scale grew at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+})
+
+describe('enteringChoreography — the label hides while the painting fills the view', () => {
+  test('the label is fully visible at rest, before the approach', () => {
+    assert.equal(enter(0).labelOpacity, 1)
+  })
+
+  test('the label is fully visible at rest, after receding', () => {
+    assert.equal(enter(1).labelOpacity, 1)
+  })
+
+  test('the label is fully hidden at the peak, when the frame has left the viewport', () => {
+    assert.equal(enter(0.5).labelOpacity, 0)
+  })
+})
+
+describe('enteringChoreography — clamping', () => {
+  test('progress below 0 behaves like progress 0', () => {
+    assert.deepEqual(enter(-3), enter(0))
+  })
+
+  test('progress above 1 behaves like progress 1', () => {
+    assert.deepEqual(enter(4), enter(1))
+  })
+})
+
+describe('enteringChoreography — reduced motion', () => {
+  test('every input returns the hung resting state, unscaled, label visible', () => {
+    for (const progress of [-2, 0, 0.5, 1, 3]) {
+      assert.deepEqual(enter(progress, true), { scale: 1, labelOpacity: 1 })
+    }
+  })
+})
+
+// The restrained treatment for a scene not marked cinematic — see
+// docs/adr/0005-scroll-choreography.md: "the rest hung as paintings carrying
+// only light movement." `progress` is 0 as the painting first enters the
+// viewport, 1 once it has settled into view.
+describe('lightMovement — a painting not marked cinematic', () => {
+  test('is invisible before it has begun to enter the viewport', () => {
+    assert.equal(lightMovement(0, false).opacity, 0)
+  })
+
+  test('is fully visible, settled in place, once it has come into view', () => {
+    const state = lightMovement(1, false)
+    assert.equal(state.opacity, 1)
+    assert.equal(state.translateYPx, 0)
+  })
+
+  test('starts lifted below its resting position and settles as it fades in', () => {
+    assert.ok(lightMovement(0, false).translateYPx > 0, 'should start below resting position')
+  })
+
+  test('opacity rises and the lift settles monotonically across the entrance', () => {
+    const STEPS = 200
+    let previousOpacity = lightMovement(0, false).opacity
+    let previousY = lightMovement(0, false).translateYPx
+    for (let i = 1; i <= STEPS; i++) {
+      const state = lightMovement(i / STEPS, false)
+      assert.ok(state.opacity >= previousOpacity - 1e-9, `opacity dipped at step ${i}`)
+      assert.ok(state.translateYPx <= previousY + 1e-9, `lift reversed at step ${i}`)
+      previousOpacity = state.opacity
+      previousY = state.translateYPx
+    }
+  })
+})
+
+describe('lightMovement — clamping', () => {
+  test('progress below 0 behaves like progress 0', () => {
+    assert.deepEqual(lightMovement(-3, false), lightMovement(0, false))
+  })
+
+  test('progress above 1 behaves like progress 1', () => {
+    assert.deepEqual(lightMovement(4, false), lightMovement(1, false))
+  })
+})
+
+describe('lightMovement — reduced motion', () => {
+  test('every input returns the settled, fully visible resting state', () => {
+    for (const progress of [-2, 0, 0.5, 1, 3]) {
+      assert.deepEqual(lightMovement(progress, true), { opacity: 1, translateYPx: 0 })
     }
   })
 })

@@ -1,6 +1,7 @@
 import { scenes } from '@/content/scenes'
 import { imageAvailability } from '@/lib/availability'
 import { OpeningScene } from '@/components/OpeningScene'
+import { EnteringScene } from '@/components/EnteringScene'
 import { StatementScene, GalleryScene, PortraitWall, Footer } from '@/components/Scenes'
 
 export default function Home() {
@@ -23,7 +24,11 @@ export default function Home() {
           case 'portraits':
             return <PortraitWall key={scene.id} scene={scene} availability={availability} />
           default:
-            return <GalleryScene key={scene.id} scene={scene} availability={availability} />
+            return scene.cinematic ? (
+              <EnteringScene key={scene.id} scene={scene} availability={availability} />
+            ) : (
+              <GalleryScene key={scene.id} scene={scene} availability={availability} />
+            )
         }
       })}
       <Footer />

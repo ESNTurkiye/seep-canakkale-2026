@@ -22,6 +22,12 @@ export type Scene = {
   headline: string
   body: string
   artworks: Artwork[]
+  /**
+   * Full scroll choreography (grows to fill the viewport, recedes as it is
+   * passed) vs. light movement only — a content decision, not a technical
+   * one. See docs/adr/0005-scroll-choreography.md.
+   */
+  cinematic?: boolean
 }
 
 export const scenes: Scene[] = [
@@ -31,6 +37,7 @@ export const scenes: Scene[] = [
     eyebrow: 'South-Eastern European Platform · 15–18 October 2026',
     headline: 'Some delegations arrive unannounced.',
     body: 'SEEP comes to Çanakkale — fifteen countries, one strait, four days.',
+    cinematic: true,
     artworks: [
       {
         src: '/artwork/opening-trojan-horse.png',
@@ -54,6 +61,7 @@ export const scenes: Scene[] = [
     eyebrow: 'Why Çanakkale',
     headline: 'Getting here used to be harder.',
     body: 'A city on both sides of a strait you can see across. Troy an hour south, Assos on the cliffs, Bozcaada an hour by sea, and the Aegean doing what it has always done.',
+    cinematic: true,
     artworks: [
       {
         src: '/artwork/why-hero-leandros.png',
@@ -149,6 +157,7 @@ export const scenes: Scene[] = [
     eyebrow: 'Applications',
     headline: 'We did warn you.',
     body: 'Places are allocated to sections, and there are never enough of them. Nobody believed her either.',
+    cinematic: true,
     artworks: [
       {
         src: '/artwork/closing-cassandra.png',

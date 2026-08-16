@@ -38,6 +38,19 @@ type PaintingProps =
       frameWidth: MotionValue<string>
       labelOpacity: MotionValue<number>
     }
+  | {
+      /**
+       * A later scene's approach and recede: already hung, so the frame is
+       * always present — only scale and the label's opacity move, driven by
+       * enteringChoreography. See ADR-0005.
+       */
+      variant: 'entering'
+      artwork: ArtworkType
+      available: boolean
+      boxRef: Ref<HTMLDivElement>
+      scale: MotionValue<number>
+      labelOpacity: MotionValue<number>
+    }
 
 /**
  * A painting on the museum wall: the artwork or its placeholder, the gilt
@@ -64,6 +77,23 @@ export function Painting(props: PaintingProps) {
             className={s.frame}
             style={{ opacity: frameOpacity, borderWidth: frameWidth }}
           />
+        </motion.div>
+        <motion.div className={s.label} style={{ opacity: labelOpacity, bottom: '6svh' }}>
+          <LabelText artwork={artwork} />
+        </motion.div>
+      </>
+    )
+  }
+
+  if (props.variant === 'entering') {
+    const { boxRef, scale, labelOpacity } = props
+    return (
+      <>
+        <motion.div ref={boxRef} className={s.enteringPainting} style={{ scale }}>
+          <div className={s.paintingInner}>
+            <Artwork artwork={artwork} available={available} />
+          </div>
+          <div className={s.frame} />
         </motion.div>
         <motion.div className={s.label} style={{ opacity: labelOpacity, bottom: '6svh' }}>
           <LabelText artwork={artwork} />

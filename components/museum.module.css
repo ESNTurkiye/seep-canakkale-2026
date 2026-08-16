@@ -43,6 +43,16 @@
   overflow: hidden;
 }
 
+/* A later cinematic scene's painting at its hung, resting size — scaled up to
+   fill the viewport as it is approached (see EnteringScene). */
+.enteringPainting {
+  position: relative;
+  width: min(52vw, calc(52svh * 16 / 9));
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  transform-origin: center center;
+}
+
 .paintingInner img {
   width: 100%;
   height: 100%;
@@ -50,11 +60,13 @@
   display: block;
 }
 
-/* The gilt frame, revealed as the artwork recedes. */
+/* The gilt frame, revealed as the artwork recedes. Opening overrides
+   border-width inline as it animates in; entering scenes use this default. */
 .frame {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  border-width: 18px;
   border-style: solid;
   border-color: var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;

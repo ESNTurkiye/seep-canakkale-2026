@@ -35,6 +35,64 @@ export const openingRest: OpeningState = {
   labelOpacity: 0,
 }
 
+export type EnteringState = {
+  scale: number
+  labelOpacity: number
+}
+
+/** The reduced-motion resting state: painting hung at its unscaled size. */
+export const enteringRest: EnteringState = {
+  scale: 1,
+  labelOpacity: 1,
+}
+
+/**
+ * A later scene's transform values at a point in its own scroll track: the
+ * hung painting grows as it is approached and recedes as it is passed. `peak`
+ * is the measured scale it needs to fill the viewport at the midpoint.
+ */
+export function enteringChoreography(
+  progress: number,
+  peak: number,
+  reducedMotion: boolean,
+): EnteringState {
+  if (reducedMotion) return enteringRest
+
+  const p = clamp01(progress)
+
+  return {
+    scale: p < 0.5 ? ramp(p, 0, 0.5, 1, peak) : ramp(p, 0.5, 1, peak, 1),
+    labelOpacity: p < 0.5 ? ramp(p, 0, 0.2, 1, 0) : ramp(p, 0.8, 1, 0, 1),
+  }
+}
+
+export type LightMovementState = {
+  opacity: number
+  translateYPx: number
+}
+
+/** The reduced-motion resting state: settled in place, fully visible. */
+export const lightMovementRest: LightMovementState = {
+  opacity: 1,
+  translateYPx: 0,
+}
+
+/**
+ * The restrained treatment for a scene not marked cinematic (see
+ * docs/adr/0005-scroll-choreography.md): a gentle fade and lift as the
+ * painting comes into view, rather than a second full choreography.
+ */
+export function lightMovement(progress: number, reducedMotion: boolean): LightMovementState {
+  if (reducedMotion) return lightMovementRest
+
+  const p = clamp01(progress)
+
+  return {
+    opacity: ramp(p, 0, 1, 0, 1),
+    translateYPx: ramp(p, 0, 1, 24, 0),
+  }
+}
+
 /**
  * The opening scene's transform values at a point in the scroll. `cover` is
  * the measured scale the hung painting needs to fill the viewport at rest.
