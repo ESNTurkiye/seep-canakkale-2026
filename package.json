@@ -9,7 +9,8 @@
     "start": "npx serve out",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && npm run build",
+    "test": "node --test",
+    "verify": "npm run typecheck && npm run test && npm run build",
     "art": "node scripts/derive-artwork.mjs"
   },
   "dependencies": {
