@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
 import { openingChoreography } from '@/lib/choreography'
-import { Artwork } from './Artwork'
+import { Painting } from './Painting'
 import s from './museum.module.css'
 
 /**
@@ -85,25 +85,16 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
         <motion.div className={s.wall} style={{ opacity: wallOpacity }} />
 
         <div className={s.canvasWrap}>
-          <motion.div
-            ref={boxRef}
-            className={s.painting}
-            style={{
-              width: 'min(88vw, calc(88svh * 16 / 9))',
-              scale,
-            }}
-          >
-            <div className={s.paintingInner}>
-              <Artwork artwork={artwork} available={available} />
-            </div>
-            <motion.div
-              className={s.frame}
-              style={{
-                opacity: frameOpacity,
-                borderWidth: frameWidth,
-              }}
-            />
-          </motion.div>
+          <Painting
+            variant="opening"
+            artwork={artwork}
+            available={available}
+            boxRef={boxRef}
+            scale={scale}
+            frameOpacity={frameOpacity}
+            frameWidth={frameWidth}
+            labelOpacity={labelOpacity}
+          />
         </div>
 
         <motion.div className={s.copy} style={{ opacity: copyOpacity }}>
@@ -122,11 +113,6 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
               )}
             </div>
           </div>
-        </motion.div>
-
-        <motion.div className={s.label} style={{ opacity: labelOpacity, bottom: '6svh' }}>
-          <p className={s.labelTitle}>{artwork.title}</p>
-          <p className={s.labelMyth}>{artwork.myth}</p>
         </motion.div>
       </div>
     </section>

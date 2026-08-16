@@ -1,7 +1,7 @@
 import type { Scene } from '@/content/scenes'
 import { oc } from '@/content/oc'
 import { event } from '@/content/event'
-import { Artwork } from './Artwork'
+import { Painting } from './Painting'
 import s from './museum.module.css'
 
 /** The rest between walls: no artwork, one statement, one green rule. */
@@ -37,13 +37,11 @@ export function GalleryScene({
       <div className={`${s.hang} ${scene.artworks.length > 1 ? s.hangTwo : ''}`}>
         {scene.artworks.map((artwork) => (
           <figure key={artwork.src} className={s.hung}>
-            <div className={s.hungFrame}>
-              <Artwork artwork={artwork} available={availability[artwork.src] ?? false} />
-            </div>
-            <figcaption className={s.hungLabel}>
-              <p className={s.labelTitle}>{artwork.title}</p>
-              <p className={s.labelMyth}>{artwork.myth}</p>
-            </figcaption>
+            <Painting
+              variant="hung"
+              artwork={artwork}
+              available={availability[artwork.src] ?? false}
+            />
           </figure>
         ))}
       </div>
