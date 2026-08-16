@@ -1,0 +1,14 @@
+node_modules/
+.next/
+out/
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+.env*
+
+# Source photographs are inputs, not outputs, and this repository is public.
+# Sixteen people's original photographs are not published — only the portraits
+# generated from them, and only once each person has approved their own.
+# See docs/adr/0002-ai-generated-oc-portraits.md
+assets/source-photos/*
+!assets/source-photos/README.md

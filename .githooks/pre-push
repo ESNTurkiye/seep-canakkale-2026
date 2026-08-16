@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+#
+# Runs the local checks before anything leaves this machine. There is no CI
+# gate on this repository, so this is the gate.
+#
+# Enable per clone with:  git config core.hooksPath .githooks
+# Skip once, deliberately, with:  git push --no-verify
+
+set -euo pipefail
+
+echo "pre-push: running npm run verify"
+
+if ! npm run verify --silent; then
+  echo
+  echo "pre-push: verify failed — push aborted."
+  echo "Fix it, or push with --no-verify if you know why you are doing that."
+  exit 1
+fi
+
+echo "pre-push: ok"
