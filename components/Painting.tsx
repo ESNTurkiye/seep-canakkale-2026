@@ -37,6 +37,10 @@ type PaintingProps =
       frameOpacity: MotionValue<number>
       frameWidth: MotionValue<string>
       labelOpacity: MotionValue<number>
+      /** Whether the opening's animated loop has landed. See ADR-0006. */
+      videoAvailable: boolean
+      /** Resolved (hydration-safe) reduced-motion preference. See ADR-0006. */
+      reducedMotion: boolean
     }
   | {
       /**
@@ -62,7 +66,8 @@ export function Painting(props: PaintingProps) {
   const { artwork, available } = props
 
   if (props.variant === 'opening') {
-    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity } = props
+    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity, videoAvailable, reducedMotion } =
+      props
     return (
       <>
         <motion.div
@@ -71,7 +76,12 @@ export function Painting(props: PaintingProps) {
           style={{ width: 'min(88vw, calc(88svh * 16 / 9))', scale }}
         >
           <div className={s.paintingInner}>
-            <Artwork artwork={artwork} available={available} />
+            <Artwork
+              artwork={artwork}
+              available={available}
+              video={videoAvailable}
+              reducedMotion={reducedMotion}
+            />
           </div>
           <motion.div
             className={s.frame}

@@ -15,7 +15,15 @@ import s from './museum.module.css'
  * device the whole site is built on — every later scene is a painting already
  * hanging on that wall.
  */
-export function OpeningScene({ scene, available }: { scene: Scene; available: boolean }) {
+export function OpeningScene({
+  scene,
+  available,
+  videoAvailable,
+}: {
+  scene: Scene
+  available: boolean
+  videoAvailable: boolean
+}) {
   const trackRef = useRef<HTMLElement>(null)
   const boxRef = useRef<HTMLDivElement>(null)
   const reduced = useReducedMotion()
@@ -83,6 +91,8 @@ export function OpeningScene({ scene, available }: { scene: Scene; available: bo
             frameOpacity={frameOpacity}
             frameWidth={frameWidth}
             labelOpacity={labelOpacity}
+            videoAvailable={videoAvailable}
+            reducedMotion={trackCollapsed}
           />
         </div>
 

@@ -20,3 +20,13 @@ export function imageAvailability(): Record<string, boolean> {
     sources.map((src) => [src, fs.existsSync(path.join(process.cwd(), 'public', src))]),
   )
 }
+
+/**
+ * Whether the opening's animated loop (docs/adr/0006) has landed. Both
+ * encodes are delivered together, so either missing falls back to the still
+ * — the opening must render exactly as it does today with no video files.
+ */
+export function openingVideoAvailable(): boolean {
+  const base = path.join(process.cwd(), 'public', 'artwork', 'opening-trojan-horse')
+  return fs.existsSync(`${base}.mp4`) && fs.existsSync(`${base}.webm`)
+}

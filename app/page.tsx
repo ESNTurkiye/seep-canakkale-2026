@@ -1,11 +1,12 @@
 import { scenes } from '@/content/scenes'
-import { imageAvailability } from '@/lib/availability'
+import { imageAvailability, openingVideoAvailable } from '@/lib/availability'
 import { OpeningScene } from '@/components/OpeningScene'
 import { EnteringScene } from '@/components/EnteringScene'
 import { StatementScene, GalleryScene, PortraitWall, Footer } from '@/components/Scenes'
 
 export default function Home() {
   const availability = imageAvailability()
+  const videoAvailable = openingVideoAvailable()
 
   return (
     <main>
@@ -17,6 +18,7 @@ export default function Home() {
                 key={scene.id}
                 scene={scene}
                 available={availability[scene.artworks[0].src] ?? false}
+                videoAvailable={videoAvailable}
               />
             )
           case 'typographic':
