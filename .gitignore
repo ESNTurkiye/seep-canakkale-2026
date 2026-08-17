@@ -12,3 +12,9 @@ next-env.d.ts
 # See docs/adr/0002-ai-generated-oc-portraits.md
 assets/source-photos/*
 !assets/source-photos/README.md
+
+# Generated-image masters are inputs, not outputs — the site only serves the
+# web-sized derivatives in public/artwork/ and public/frames/. Keeping masters
+# out of git avoids permanently accumulating every regenerated painting.
+# See docs/adr/0007-masters-out-of-git.md
+assets/artwork-masters/

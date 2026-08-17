@@ -42,7 +42,7 @@ export const scenes: Scene[] = [
     body: 'SEEP comes to Çanakkale — fifteen countries, one strait, four days.',
     artworks: [
       {
-        src: '/artwork/opening-trojan-horse.png',
+        src: '/artwork/opening-trojan-horse.jpg',
         title: 'The Delegation',
         myth: 'after the Trojan Horse',
         alt: 'Modern travellers with backpacks and suitcases climbing down from the wooden horse of Troy, met by astonished citizens in classical dress.',
@@ -66,7 +66,7 @@ export const scenes: Scene[] = [
     cinematic: true,
     artworks: [
       {
-        src: '/artwork/why-hero-leandros.png',
+        src: '/artwork/why-hero-leandros.jpg',
         title: 'The Crossing',
         myth: 'after Hero and Leander',
         alt: 'A swimmer crossing the Dardanelles at dawn towards a marble tower, where a woman holds up a phone torch to guide him.',
@@ -81,13 +81,13 @@ export const scenes: Scene[] = [
     body: 'Three programme days. Each one opens with a plenary and breaks into parallel sessions — which is where the trouble starts.',
     artworks: [
       {
-        src: '/artwork/venues-homer-recital.png',
+        src: '/artwork/venues-homer-recital.jpg',
         title: 'The Recital',
         myth: 'after Homer',
         alt: 'Blind Homer reciting on a marble dais to a seated audience, while a scribe transcribes on a laptop.',
       },
       {
-        src: '/artwork/venues-judgement-of-paris.png',
+        src: '/artwork/venues-judgement-of-paris.jpg',
         title: 'The Choice',
         myth: 'after the Judgement of Paris',
         alt: 'A shepherd holding a golden apple, unable to choose between three goddesses standing before three doorways.',
@@ -102,7 +102,7 @@ export const scenes: Scene[] = [
     body: 'Ours arrives on a brass tray: tea in tulip glasses, Turkish coffee, and peynir helvası you will look up on the way home.',
     artworks: [
       {
-        src: '/artwork/coffee-achilles.png',
+        src: '/artwork/coffee-achilles.jpg',
         title: 'The Break',
         myth: "after Achilles' heel",
         alt: 'A hero in bronze greaves sitting on marble steps, ignoring an arrow at his heel, holding a tulip glass of tea and reaching for a tray of sweets.',
@@ -117,13 +117,13 @@ export const scenes: Scene[] = [
     body: 'Intercultural Night, where fifteen countries put their food on one table. Turkish Night, where the host section returns the favour.',
     artworks: [
       {
-        src: '/artwork/evenings-intercultural.png',
+        src: '/artwork/evenings-intercultural.jpg',
         title: 'The Table',
         myth: 'after the Sirens',
         alt: 'A long marble banquet table above the sea at dusk, figures from many lands passing dishes, two sirens singing unheeded from a balustrade.',
       },
       {
-        src: '/artwork/evenings-turkish-night.png',
+        src: '/artwork/evenings-turkish-night.jpg',
         title: 'The Circle',
         myth: 'after the Anatolian round dance',
         alt: 'Figures in classical drapery dancing in a linked circle on a marble terrace at night, a lute player and a tray of tea glasses beside them.',
@@ -138,7 +138,7 @@ export const scenes: Scene[] = [
     body: 'Beds, breakfast and a short walk to everything. The Greeks had a word for the rest of it.',
     artworks: [
       {
-        src: '/artwork/stay-xenia.png',
+        src: '/artwork/stay-xenia.jpg',
         title: 'Xenia',
         myth: 'after the Homeric rite of guest-friendship',
         alt: 'A host kneeling to wash the feet of an arriving traveller at a colonnaded threshold, a modern rolling suitcase standing beside them.',
@@ -162,7 +162,7 @@ export const scenes: Scene[] = [
     cinematic: true,
     artworks: [
       {
-        src: '/artwork/closing-cassandra.png',
+        src: '/artwork/closing-cassandra.jpg',
         title: 'The Warning',
         myth: 'after Cassandra',
         alt: 'Cassandra on the walls of Troy, arm outstretched to a crowd turning away, a phone at her side showing an almost-full bar.',

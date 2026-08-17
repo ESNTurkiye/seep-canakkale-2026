@@ -1,5 +1,5 @@
 # Generated artwork
 
 Generated images land here. See docs/art-direction.md for the prompt behind each
-filename. Files are gitignored only if they exceed what the repo should carry;
-for now they are committed so the site builds anywhere.
+filename. These are web-sized derivatives only — the 4K+ generation masters live
+in assets/artwork-masters/, gitignored. See docs/adr/0007-masters-out-of-git.md.

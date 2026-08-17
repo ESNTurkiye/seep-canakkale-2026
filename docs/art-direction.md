@@ -2,6 +2,12 @@
 
 Every image on this site is generated. This file is the source of truth for how: the shared style, the per-scene prompts, and the portrait pipeline. Generated files land in `public/artwork/` and `public/portraits/` under the filenames given below — the code reads those paths, so a regenerated image replaces the old one with no code change.
 
+## Masters vs. committed assets
+
+Scene artwork is generated at a large master resolution (5504 × 3072), then downsized to a ~2000px web variant. Only the web variant is committed, to `public/artwork/`. The master is not committed — see `docs/adr/0007-masters-out-of-git.md` — it lives in `assets/artwork-masters/`, which is gitignored. Frames have no separate master: they're generated once directly at their final ~2000px size, straight into `public/frames/`.
+
+**TODO: masters need a shared archive location, not just one contributor's laptop. Not decided yet — name it here once it exists.**
+
 Target model: Nano Banana Pro (Gemini 3 Pro Image) via Higgsfield. Any model that preserves identity from a reference photograph works for the portraits; the scene artworks are model-agnostic.
 
 ## Rules that apply to every image
@@ -21,7 +27,7 @@ Prepend this to every scene prompt:
 
 ## Scene artwork
 
-### 1. `opening-trojan-horse.png` — Opening
+### 1. `opening-trojan-horse.jpg` — Opening
 
 The great wooden horse of Troy standing before the city walls at first light, its side hatch swung open and a rope ladder hanging down. A stream of young modern travellers is climbing out of it — canvas backpacks, rolling suitcases, lanyards with blank badges around their necks — and being met by astonished Trojan citizens in drapery who reach up to help them down. Warm dust in the air. The horse occupies the right two-thirds; the lower-left is open ground and open sky.
 
@@ -29,31 +35,31 @@ The great wooden horse of Troy standing before the city walls at first light, it
 
 "SEEP is in Çanakkale" is typographic — near-black ground, one line of type, SEEP green rule. This scene is the eye's rest between the opening and the first gallery wall. Do not generate art for it.
 
-### 3. `why-hero-leandros.png` — Why Çanakkale
+### 3. `why-hero-leandros.jpg` — Why Çanakkale
 
 A young man swimming across a narrow moonlit-into-dawn strait towards a marble tower on the far shore, where a woman leans from the parapet holding up a light to guide him — the light is a smartphone torch, held exactly the way a person holds a phone. Both continents visible, the water narrow enough to feel crossable. Wide landscape; the swimmer small, the strait dominant. Lower-left is open water.
 
-### 4a. `venues-homer-recital.png` — Daytime venues, plenary
+### 4a. `venues-homer-recital.jpg` — Daytime venues, plenary
 
 Blind Homer standing on a low marble dais, mid-recital, one hand raised, before a packed semicircle of seated listeners in drapery who lean forward. Beside him a scribe sits cross-legged transcribing — on an open silver laptop resting on his knees. Amphitheatre setting, columns behind, sea visible through the gap. Lower-left corner is empty marble floor.
 
-### 4b. `venues-judgement-of-paris.png` — Daytime venues, parallel sessions
+### 4b. `venues-judgement-of-paris.jpg` — Daytime venues, parallel sessions
 
 The Judgement of Paris: a young shepherd seated on a rock holding a single golden apple, facing three goddesses standing in a row before three separate doorways, each doorway leading into a different bright interior. He is visibly unable to choose. The three goddesses occupy the right; the apple catches the light. Lower-left is open hillside.
 
-### 5. `coffee-achilles.png` — Coffee breaks
+### 5. `coffee-achilles.jpg` — Coffee breaks
 
 A young hero in bronze greaves seated on marble steps in the shade of a colonnade, an arrow lying forgotten on the step beside his heel. He is entirely absorbed in a small tulip-shaped glass of tea he holds in one hand, reaching with the other towards a brass tray of white cut sweets and pastries. Relaxed, unheroic, mid-break. Figure right of centre; lower-left is sunlit floor.
 
-### 6a. `evenings-intercultural.png` — Intercultural Night
+### 6a. `evenings-intercultural.jpg` — Intercultural Night
 
 A long marble banquet table on a terrace above the sea at dusk, crowded with figures in drapery from visibly different lands, each presenting a dish or a bottle to the others, plates passing hand to hand. Above them, on a balustrade, two sirens sit watching, singing, entirely ignored. Warm lamplight, no modern object except the crowd's ease. Lower-left is terrace floor.
 
-### 6b. `evenings-turkish-night.png` — Turkish Night
+### 6b. `evenings-turkish-night.jpg` — Turkish Night
 
 Figures in classical drapery joined in a circle dance on a marble terrace at night, holding each other's little fingers in the Anatolian way, learning the steps and laughing. To one side a seated musician plays a long-necked lute, and a small tray of tulip-shaped tea glasses rests on the balustrade. Sea and dark hills behind. Lower-left is open floor.
 
-### 7. `stay-xenia.png` — Where you'll stay
+### 7. `stay-xenia.jpg` — Where you'll stay
 
 The Homeric rite of guest-friendship: a host kneeling at the threshold of a colonnaded villa, washing the feet of an arriving traveller who is seated and clearly exhausted from a long journey. Beside the traveller stands a modern hard-shell rolling suitcase, upright, handle extended. On a marble side table, a small brass reception bell. Evening light through the columns. Lower-left is threshold stone.
 
@@ -61,7 +67,7 @@ The Homeric rite of guest-friendship: a host kneeling at the threshold of a colo
 
 See the portrait pipeline below.
 
-### 9. `closing-cassandra.png` — Closing / CTA
+### 9. `closing-cassandra.jpg` — Closing / CTA
 
 Cassandra standing high on the walls of Troy, one arm outstretched towards a crowd below who are turning away from her, uninterested. In her other hand, held down at her side and unnoticed, a phone whose screen glows with a bar that is almost entirely filled. Wind in her drapery, city behind, sea beyond. She is right of centre and high in the frame; the lower-left is wall and sky.
 
@@ -87,7 +93,7 @@ If the model cannot deliver true transparency, generate against flat magenta and
 
 The opening scene is the only moving image on the site. See `docs/adr/0006-hero-loop-only-no-scrubbed-video.md`.
 
-- Source: the finished `opening-trojan-horse.png`, animated. Do not generate a different composition.
+- Source: the finished `opening-trojan-horse.jpg`, animated. Do not generate a different composition.
 - 3–4 seconds, **seamless** — the last frame must meet the first. Silent. No camera move: the scroll already moves the frame, and a second movement fights it.
 - What moves: clouds drifting, dust in the air, drapery shifting, one delegate still stepping down the ladder. Nothing else. The painting should look alive, not animated.
 - Deliver `opening-trojan-horse.mp4` and `.webm` into `public/artwork/`. The still stays as poster and fallback.
