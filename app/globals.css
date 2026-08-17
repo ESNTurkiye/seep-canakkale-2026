@@ -1,0 +1,92 @@
+/*
+ * Tokens follow the ESN Visual Identity Manual (2023). Oswald substitutes for
+ * Kelson Sans on the web; Lato is the body face. SEEP green is the accent —
+ * it is only ever used on dark ground, never as text on white, per the ESN
+ * contrast rule.
+ */
+
+:root {
+  /* ESN brand */
+  --esn-dark-blue: #2e3192;
+  --esn-cyan: #00aeef;
+  --esn-green: #7ac143;
+  --esn-orange: #f47b20;
+  --esn-magenta: #ec008c;
+
+  /* This site */
+  --seep: var(--esn-green);
+  --ink: #0f1012;
+  --wall: #17191d;
+  --wall-lit: #1e2126;
+  --marble: #f4f1ea;
+  --dust: #9aa0a6;
+  --frame: #b08d4f;
+  --frame-lit: #e0c48a;
+
+  --measure: 34ch;
+  --gutter: clamp(1.25rem, 4vw, 4rem);
+
+  --step--1: clamp(0.82rem, 0.78rem + 0.2vw, 0.95rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-3: clamp(2rem, 1.4rem + 3vw, 4rem);
+  --step-4: clamp(2.6rem, 1.6rem + 5vw, 6.5rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ink);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--marble);
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.eyebrow {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--seep);
+  margin: 0;
+}
+
+.accent {
+  color: var(--seep);
+}
+
+/* Anyone who has asked their system to calm down gets a site that holds still. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

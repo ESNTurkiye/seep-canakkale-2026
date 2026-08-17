@@ -1,0 +1,374 @@
+/* The museum: scrolling is walking a gallery, each scene is a wall. */
+
+.track {
+  position: relative;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+}
+
+.wall {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--wall-lit) 0%, var(--wall) 55%, var(--ink) 100%);
+}
+
+.canvasWrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.painting {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  transform-origin: center center;
+}
+
+.paintingInner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* A later cinematic scene's painting and its label, grouped and centred as
+   one unit — see the comment on Painting's 'entering' variant. */
+.enteringGroup {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+}
+
+/* A later cinematic scene's painting at its hung, resting size — scaled up to
+   fill the viewport as it is approached (see EnteringScene). */
+.enteringPainting {
+  position: relative;
+  width: min(52vw, calc(52svh * 16 / 9));
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  transform-origin: center center;
+}
+
+.enteringLabel {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.paintingInner img,
+.paintingInner video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The gilt frame, revealed as the artwork recedes. Opening overrides
+   border-width inline as it animates in; entering scenes use this default. */
+.frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-width: 18px;
+  border-style: solid;
+  border-color: var(--frame);
+  border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.6) inset,
+    0 40px 80px -20px rgba(0, 0, 0, 0.85);
+}
+
+/* Placeholder shown until the generated artwork lands in public/artwork/. */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 2rem;
+  background:
+    radial-gradient(75% 60% at 30% 25%, rgba(244, 241, 234, 0.16), transparent 60%),
+    linear-gradient(170deg, #4a6274 0%, #6d7d6a 45%, #9a7f61 100%);
+}
+
+/* Held back deliberately: the placeholder must not compete with the headline
+   that sits over it. It marks the slot, it does not fill it. */
+.placeholderMark {
+  font-family: var(--font-display), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: var(--step--1);
+  color: rgba(15, 16, 18, 0.35);
+}
+
+.placeholderTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step-1);
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 0.35em;
+}
+
+/* Copy layer over the opening artwork, mirroring the reference layout:
+   headline bottom-left, supporting copy and action bottom-right. */
+.copy {
+  position: absolute;
+  inset: 0;
+  padding: var(--gutter);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.copyBottom {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: end;
+}
+
+@media (min-width: 900px) {
+  .copyBottom {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+
+.headline {
+  font-size: var(--step-4);
+  max-width: 16ch;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
+}
+
+.side {
+  max-width: var(--measure);
+  display: grid;
+  gap: 1.25rem;
+  justify-items: start;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+}
+
+.cta {
+  pointer-events: auto;
+  display: inline-block;
+  background: var(--seep);
+  color: var(--ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step-0);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.7em 1.4em;
+  border: 0;
+}
+
+.cta:hover {
+  background: #8fd158;
+}
+
+.ctaPending {
+  composes: cta;
+  background: transparent;
+  color: var(--dust);
+  border: 1px solid rgba(154, 160, 166, 0.4);
+  cursor: default;
+}
+
+/* The gallery label beneath a hung painting. */
+.label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.labelTitle {
+  font-family: var(--font-display), sans-serif;
+  font-style: italic;
+  font-size: var(--step-0);
+  color: var(--marble);
+}
+
+.labelMyth {
+  font-size: var(--step--1);
+  color: var(--dust);
+}
+
+/* Typographic scene — the rest between walls. */
+.statement {
+  min-height: 92svh;
+  display: grid;
+  align-content: center;
+  gap: 2rem;
+  padding: calc(var(--gutter) * 1.5) var(--gutter);
+  background: var(--ink);
+}
+
+.statementInner {
+  max-width: 22ch;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.statementHeadline {
+  font-size: var(--step-3);
+  max-width: 20ch;
+}
+
+.statementBody {
+  max-width: var(--measure);
+  color: var(--dust);
+}
+
+.rule {
+  width: 4rem;
+  height: 3px;
+  background: var(--seep);
+}
+
+/* Gallery scenes — one or two paintings hung on the wall. */
+.gallery {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  gap: clamp(2rem, 5vw, 4rem);
+  padding: clamp(4rem, 10vh, 9rem) var(--gutter);
+  background: var(--ink);
+}
+
+.galleryHead {
+  display: grid;
+  gap: 1rem;
+  max-width: 62rem;
+}
+
+.galleryHeadline {
+  font-size: var(--step-3);
+}
+
+.galleryBody {
+  max-width: 46ch;
+  color: var(--dust);
+}
+
+.hang {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  justify-items: center;
+}
+
+@media (min-width: 900px) {
+  .hangTwo {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.hung {
+  width: 100%;
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.hungFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: clamp(8px, 1.1vw, 16px) solid var(--frame);
+  border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+}
+
+.hungFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hungLabel {
+  text-align: center;
+  display: grid;
+  gap: 0.15rem;
+}
+
+/* The portrait wall — sixteen of them. */
+.portraitWall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+.portrait {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.portraitFrame {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: clamp(5px, 0.6vw, 9px) solid var(--frame);
+  border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 40%, #7a5f30 75%, var(--frame-lit)) 1;
+  box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  background: linear-gradient(165deg, #3c3b38, #2a2926 60%, #201f1d);
+}
+
+.portraitFrame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.portraitAwaiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(244, 241, 234, 0.28);
+}
+
+.portraitName {
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step-0);
+  line-height: 1.15;
+}
+
+.portraitTitle {
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--seep);
+}
+
+.portraitRole {
+  font-size: var(--step--1);
+  color: var(--dust);
+}
+
+.footer {
+  padding: clamp(3rem, 8vh, 6rem) var(--gutter);
+  display: grid;
+  gap: 0.5rem;
+  color: var(--dust);
+  font-size: var(--step--1);
+  border-top: 1px solid rgba(244, 241, 234, 0.08);
+}
