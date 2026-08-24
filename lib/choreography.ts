@@ -95,13 +95,28 @@ export function lightMovement(progress: number, reducedMotion: boolean): LightMo
 }
 
 /**
+ * Progress at which the opening's scale ramp reaches its full-bleed peak.
+ * Scale holds at peak from here to the end of the track, giving the
+ * ink-crossfade transition (see `inkCrossfadeOpacity`) room to hold on a
+ * settled full-bleed frame before fading, rather than fading while still
+ * growing. `openingInkStart` must be >= this — asserted in
+ * choreography.test.ts — or the crossfade starts before the growth finishes.
+ */
+export const openingPeakProgress = 0.8
+
+/** Progress at which OpeningScene starts its ink-crossfade fade to the next scene. */
+export const openingInkStart = 0.88
+
+/**
  * The opening scene's transform values at a point in the scroll: a single
  * monotonic ramp from the small hung painting up to full bleed, the museum
  * framing device established before the myth comes alive — see
  * docs/adr/0005-scroll-choreography.md. `cover` is the measured scale the hung
  * painting needs to fill the viewport at rest; `peak` overshoots it slightly
- * so full bleed reads as a bleed rather than a flush fit. At peak the scene
- * hands off to the next one via the ink-crossfade transition rather than
+ * so full bleed reads as a bleed rather than a flush fit. Scale reaches peak
+ * at `openingPeakProgress`, well before the track ends, so there is a real
+ * hold on the full-bleed frame before the scene hands off to the next one via
+ * the ink-crossfade transition (starting at `openingInkStart`) rather than
  * resting.
  */
 export function openingChoreography(
@@ -115,11 +130,27 @@ export function openingChoreography(
   const peak = cover * 1.06
 
   return {
-    scale: ramp(p, 0, 1, 1, peak),
-    wallOpacity: ramp(p, 0.3, 0.8, 1, 0),
-    frameOpacity: ramp(p, 0.38, 0.7, 1, 0),
-    frameWidthPx: ramp(p, 0.32, 0.7, 18, 0),
-    copyOpacity: ramp(p, 0.56, 0.82, 0, 1),
-    labelOpacity: ramp(p, 0.05, 0.26, 1, 0),
+    scale: ramp(p, 0, openingPeakProgress, 1, peak),
+    wallOpacity: ramp(p, 0.22, 0.6, 1, 0),
+    frameOpacity: ramp(p, 0.28, 0.52, 1, 0),
+    frameWidthPx: ramp(p, 0.24, 0.52, 18, 0),
+    copyOpacity: ramp(p, 0.42, 0.65, 0, 1),
+    labelOpacity: ramp(p, 0.04, 0.2, 1, 0),
   }
+}
+
+/**
+ * Opacity of the ink crossfade that carries the viewer from a scene at rest
+ * on its full-bleed peak to the next scene — see
+ * docs/adr/0005-scroll-choreography.md and issue #15. A generic ramp from 0
+ * to 1 across `[start, 1]` of whatever scroll progress the calling scene
+ * already tracks, so any scene's own track can drive it once that scene can
+ * reach and hold a peak — not tied to OpeningState/EnteringState. Collapses
+ * to permanently transparent under reduced motion: sections are already
+ * stacked with no scroll-driven animation in that mode, which is already a
+ * hard cut with no fade to add.
+ */
+export function inkCrossfadeOpacity(progress: number, start: number, reducedMotion: boolean): number {
+  if (reducedMotion) return 0
+  return ramp(clamp01(progress), start, 1, 0, 1)
 }

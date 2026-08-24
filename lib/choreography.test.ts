@@ -3,8 +3,11 @@ import assert from 'node:assert/strict'
 import {
   openingChoreography,
   openingRest,
+  openingPeakProgress,
+  openingInkStart,
   enteringChoreography,
   lightMovement,
+  inkCrossfadeOpacity,
   type OpeningState,
 } from './choreography.ts'
 
@@ -62,6 +65,25 @@ describe('openingChoreography — progress 1 (end of the scroll, full bleed)', (
   })
 })
 
+describe('openingChoreography — scale settles at peak before the ink crossfade starts', () => {
+  // The ink-crossfade transition (see the `inkCrossfadeOpacity` tests below)
+  // is driven by the same scroll progress starting at `openingInkStart`. If
+  // that ever moved earlier than `openingPeakProgress`, the crossfade would
+  // start while the painting is still growing — the "janky double
+  // transition" issue #15 explicitly rules out.
+  test('openingInkStart is not before openingPeakProgress', () => {
+    assert.ok(openingInkStart >= openingPeakProgress)
+  })
+
+  test('scale has already reached peak by openingPeakProgress', () => {
+    assert.equal(choreograph(openingPeakProgress).scale, PEAK_SCALE)
+  })
+
+  test('scale is still at peak, unchanged, once the ink crossfade begins', () => {
+    assert.equal(choreograph(openingInkStart).scale, PEAK_SCALE)
+  })
+})
+
 describe('openingChoreography — the frame fades out before the copy has fully faded in', () => {
   // The museum device depends on this ordering: the frame should be most of
   // the way gone before the headline claims the screen, not still fully
@@ -91,7 +113,7 @@ describe('openingChoreography — the frame fades out before the copy has fully 
   test('the frame has fully faded out well before the copy reaches full opacity', () => {
     const p = firstProgressWhereFrameIsGone()
     assert.ok(p < 1, `expected the frame to fully fade out before p=1, got ${p}`)
-    // Pinned to the shipped choreography's actual value (~0.557) with
+    // Pinned to the shipped choreography's actual value (~0.52) with
     // headroom for retuning, so this only fires for a real ordering
     // regression rather than ordinary threshold adjustments.
     assert.ok(
@@ -346,6 +368,55 @@ describe('lightMovement — reduced motion', () => {
   test('every input returns the settled, fully visible resting state', () => {
     for (const progress of [-2, 0, 0.5, 1, 3]) {
       assert.deepEqual(lightMovement(progress, true), { opacity: 1, translateYPx: 0 })
+    }
+  })
+})
+
+// The reusable primitive behind the ink-crossfade transition (issue #15) —
+// generic over whatever scene's own scroll progress and chosen `start` are
+// passed in, so it isn't tied to OpeningState/EnteringState. `START` here is
+// arbitrary, unrelated to `openingInkStart`, to prove the function takes it
+// as a parameter rather than hardcoding a scene's threshold.
+const START = 0.75
+
+describe('inkCrossfadeOpacity — before the fade begins', () => {
+  test('is fully transparent up to and including start', () => {
+    assert.equal(inkCrossfadeOpacity(0, START, false), 0)
+    assert.equal(inkCrossfadeOpacity(START, START, false), 0)
+  })
+})
+
+describe('inkCrossfadeOpacity — the fade to ink', () => {
+  test('is fully opaque at the end of the track', () => {
+    assert.equal(inkCrossfadeOpacity(1, START, false), 1)
+  })
+
+  test('rises monotonically from start to 1', () => {
+    const STEPS = 500
+    let previous = inkCrossfadeOpacity(START, START, false)
+    for (let i = 1; i <= STEPS; i++) {
+      const p = START + (i / STEPS) * (1 - START)
+      const current = inkCrossfadeOpacity(p, START, false)
+      assert.ok(current >= previous - 1e-9, `opacity fell at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+})
+
+describe('inkCrossfadeOpacity — clamping', () => {
+  test('progress below start behaves like start (fully transparent)', () => {
+    assert.equal(inkCrossfadeOpacity(-3, START, false), 0)
+  })
+
+  test('progress above 1 behaves like 1 (fully opaque)', () => {
+    assert.equal(inkCrossfadeOpacity(4, START, false), 1)
+  })
+})
+
+describe('inkCrossfadeOpacity — reduced motion', () => {
+  test('is always fully transparent, regardless of progress — a hard cut, not a fade', () => {
+    for (const progress of [-2, 0, START, 0.9, 1, 3]) {
+      assert.equal(inkCrossfadeOpacity(progress, START, true), 0)
     }
   })
 })

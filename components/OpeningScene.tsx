@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
-import { openingChoreography } from '@/lib/choreography'
+import { openingChoreography, openingInkStart, inkCrossfadeOpacity } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
+import { InkCrossfade } from './InkCrossfade'
 import s from './museum.module.css'
 
 /**
@@ -68,9 +69,19 @@ export function OpeningScene({
   const frameWidth = useTransform(state, (st) => `${st.frameWidthPx}px`)
   const copyOpacity = useTransform(state, (st) => st.copyOpacity)
   const labelOpacity = useTransform(state, (st) => st.labelOpacity)
+  // Drives the ink-crossfade overlay below — kept as its own transform off
+  // scrollYProgress (not a field on `state`) since it isn't part of
+  // OpeningState, see InkCrossfade.tsx.
+  const inkOpacity = useTransform(scrollYProgress, (p) =>
+    inkCrossfadeOpacity(p, openingInkStart, !!reduced),
+  )
   // copyOpacity starts at 0 (see openingChoreography) — without this, the CTA
   // link inside stays keyboard-focusable while fully invisible at page load.
-  const copyVisibility = useTransform(copyOpacity, (o) => (o > 0.02 ? 'visible' : 'hidden'))
+  // Also hidden once the ink crossfade has covered it, so the same link
+  // can't be focused or clicked through the overlay at the end of the track.
+  const copyVisibility = useTransform([copyOpacity, inkOpacity], ([co, io]: number[]) =>
+    co > 0.02 && io < 0.98 ? 'visible' : 'hidden',
+  )
 
   const artwork = scene.artworks[0]
 
@@ -80,9 +91,11 @@ export function OpeningScene({
       className={s.track}
       // EnteringScene's 320svh is a full approach-and-recede round trip, i.e.
       // ~160svh one-way; the opening only grows one-way but needs a bit more
-      // for the copy fade-in to land after full bleed, hence 220svh. Estimate
-      // — remeasure by scrolling once real content is in place.
-      style={{ height: trackCollapsed ? '100svh' : '220svh' }}
+      // for the copy fade-in to land after full bleed, plus a real hold at
+      // peak (openingPeakProgress) before the ink crossfade (openingInkStart)
+      // hands off to the next scene, hence 260svh. Estimate — remeasure by
+      // scrolling once real content is in place.
+      style={{ height: trackCollapsed ? '100svh' : '260svh' }}
       aria-label={scene.headline}
     >
       <div className={s.stage}>
@@ -120,6 +133,8 @@ export function OpeningScene({
             </div>
           </div>
         </motion.div>
+
+        <InkCrossfade progress={scrollYProgress} start={openingInkStart} reducedMotion={!!reduced} />
       </div>
     </section>
   )

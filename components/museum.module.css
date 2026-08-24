@@ -21,6 +21,14 @@
     radial-gradient(120% 90% at 50% 0%, var(--wall-lit) 0%, var(--wall) 55%, var(--ink) 100%);
 }
 
+/* Carries the viewer between scenes — see InkCrossfade.tsx and issue #15. */
+.inkCrossfade {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  pointer-events: none;
+}
+
 .canvasWrap {
   position: relative;
   width: 100%;
