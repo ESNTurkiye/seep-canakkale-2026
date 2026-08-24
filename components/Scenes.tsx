@@ -91,7 +91,6 @@ export function PortraitWall({
               </div>
               <div>
                 <p className={s.portraitName}>{member.name}</p>
-                <p className={s.portraitTitle}>{member.antiqueTitle}</p>
                 <p className={s.portraitRole}>{member.role}</p>
               </div>
             </li>

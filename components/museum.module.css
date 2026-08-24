@@ -353,15 +353,9 @@
   line-height: 1.15;
 }
 
-.portraitTitle {
-  font-size: var(--step--1);
-  font-style: italic;
-  color: var(--seep);
-}
-
 .portraitRole {
   font-size: var(--step--1);
-  color: var(--dust);
+  color: var(--seep);
 }
 
 .footer {
