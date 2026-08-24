@@ -59,9 +59,13 @@ A long marble banquet table on a terrace above the sea at dusk, crowded with fig
 
 Figures in classical drapery joined in a circle dance on a marble terrace at night, holding each other's little fingers in the Anatolian way, learning the steps and laughing. To one side a seated musician plays a long-necked lute, and a small tray of tulip-shaped tea glasses rests on the balustrade. Sea and dark hills behind. Lower-left is open floor.
 
-### 7. `stay-xenia.jpg` — Where you'll stay
+### 7a. `stay-xenia.jpg` — Where you'll stay, Temizay Otel
 
 The Homeric rite of guest-friendship: a host kneeling at the threshold of a colonnaded villa, washing the feet of an arriving traveller who is seated and clearly exhausted from a long journey. Beside the traveller stands a modern hard-shell rolling suitcase, upright, handle extended. On a marble side table, a small brass reception bell. Evening light through the columns. Lower-left is threshold stone.
+
+### 7b. `stay-kule-beacon.jpg` — Where you'll stay, Kule Otel
+
+Hestia's kept flame, high above the strait: a keeper standing at the top of a stone tower, tending a great hearth-brazier that burns as a beacon over the darkening water, guiding travellers home. The view is from beside the keeper, looking out over the tower's edge rather than up from the shore — a different vantage from Scene 3's crossing. A modern hard-shell rolling suitcase rests at the foot of the tower, below the keeper, handle extended. Figure and brazier upper-right; lower-left is open sky and sea.
 
 ### 8. Scene 8 uses portraits, not scene artwork
 
@@ -110,7 +114,7 @@ Shared rules for every loop, regardless of scene:
 
 ## Real photographs — the venue reveal (issue #20)
 
-A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, `diptych` or single `artwork`, not just the two scenes below — but only these four are wanted live right now.
+A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, `diptych` or single `artwork`, not just the scenes below — but only these six are wanted live right now.
 
 - **Filename**: `<same-basename>-real.jpg`, next to the painting's still under `public/artwork/`. No other code change required once the file lands.
 - **Source**: an actual photograph of the real venue, not generated art — this is where the site follows through on showing the venues themselves, not just the myth.
@@ -123,7 +127,11 @@ A hung painting can carry a real photograph behind it, gated on file presence ex
 
 ### 6b. `evenings-turkish-night-real.jpg` — the Turkish Night venue behind The Circle
 
-**Do not add `coffee-achilles-real.jpg` or `stay-xenia-real.jpg`.** Both scenes are non-cinematic and would pick up the reveal automatically the moment the file exists — the coffee-break exclusion (issue #20) is enforced only by withholding the asset, not by any code gate, so nobody should "helpfully" supply one.
+### 7a. `stay-xenia-real.jpg` — Temizay Otel behind Xenia
+
+### 7b. `stay-kule-beacon-real.jpg` — Kule Otel behind The Beacon
+
+**Do not add `coffee-achilles-real.jpg`.** That scene is non-cinematic and would pick up the reveal automatically the moment the file exists — the coffee-break exclusion (issue #20) is enforced only by withholding the asset, not by any code gate, so nobody should "helpfully" supply one.
 
 ## Portraits — the sixteen Organising Committee members
 

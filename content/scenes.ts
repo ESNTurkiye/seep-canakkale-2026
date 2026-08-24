@@ -143,16 +143,22 @@ export const scenes: Scene[] = [
   },
   {
     id: 'stay',
-    kind: 'artwork',
+    kind: 'diptych',
     eyebrow: 'Where you will stay',
     headline: 'Hospitality was a sacred duty here long before it was an industry.',
-    body: 'Beds, breakfast and a short walk to everything. The Greeks had a word for the rest of it.',
+    body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. The Greeks had a word for the rest of it.',
     artworks: [
       {
         src: '/artwork/stay-xenia.jpg',
         title: 'Xenia',
         myth: 'after the Homeric rite of guest-friendship',
         alt: 'A host kneeling to wash the feet of an arriving traveller at a colonnaded threshold, a modern rolling suitcase standing beside them.',
+      },
+      {
+        src: '/artwork/stay-kule-beacon.jpg',
+        title: 'The Beacon',
+        myth: "after Hestia's kept flame",
+        alt: "A keeper standing at the top of a stone tower, tending a hearth-brazier that burns as a beacon over the darkening strait, a modern rolling suitcase resting at the tower's foot.",
       },
     ],
   },
