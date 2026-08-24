@@ -26,9 +26,10 @@ export type Scene = {
    * Full scroll choreography (grows to fill the viewport, recedes as it is
    * passed) vs. light movement only — a content decision, not a technical
    * one. See docs/adr/0005-scroll-choreography.md. Only meaningful on a
-   * single-artwork `artwork`/`diptych`/`closing` scene — the opening is
-   * always fully choreographed by virtue of its kind, and typographic and
-   * portrait scenes have no single painting to choreograph.
+   * single-artwork `artwork`/`diptych` scene — the opening and closing are
+   * always fully choreographed by virtue of their kind (the closing via its
+   * own dedicated `ClosingScene`, issue #18), and typographic and portrait
+   * scenes have no single painting to choreograph.
    */
   cinematic?: boolean
   /**
@@ -169,7 +170,6 @@ export const scenes: Scene[] = [
     eyebrow: 'Applications',
     headline: 'We did warn you.',
     body: 'Places are allocated to sections, and there are never enough of them. Nobody believed her either.',
-    cinematic: true,
     artworks: [
       {
         src: '/artwork/closing-cassandra.jpg',
@@ -182,11 +182,19 @@ export const scenes: Scene[] = [
 ]
 
 for (const scene of scenes) {
-  if (scene.cinematic && scene.artworks.length !== 1) {
+  const singleArtworkRequired = scene.cinematic || scene.kind === 'opening' || scene.kind === 'closing'
+  if (singleArtworkRequired && scene.artworks.length !== 1) {
     throw new Error(
-      `Scene "${scene.id}" is marked cinematic but has ${scene.artworks.length} artworks — ` +
-        `EnteringScene needs exactly one (it renders only the first, and app/page.tsx reads ` +
-        `artworks[0] directly).`,
+      `Scene "${scene.id}" needs exactly one artwork but has ${scene.artworks.length} — its scene ` +
+        `component (OpeningScene/EnteringScene/ClosingScene) renders only the first, and ` +
+        `app/page.tsx reads artworks[0] directly.`,
+    )
+  }
+  if (scene.cinematic !== undefined && (scene.kind === 'opening' || scene.kind === 'closing')) {
+    throw new Error(
+      `Scene "${scene.id}" sets \`cinematic\` but is kind "${scene.kind}" — that kind is always fully ` +
+        `choreographed via its own dedicated component, so \`cinematic\` is meaningless (and ignored by ` +
+        `app/page.tsx's dispatch) there.`,
     )
   }
   if (scene.recede !== undefined && !scene.cinematic) {

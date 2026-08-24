@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
-import { event } from '@/content/event'
 import { enteringChoreography, enteringInkStart, inkCrossfadeOpacity } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
@@ -106,10 +105,10 @@ export function EnteringScene({
     inkCrossfadeOpacity(p, enteringInkStart, !!reduced),
   )
   // copyOpacity sits near 0 at both ends of the track (see enteringChoreography)
-  // — without this, the closing scene's CTA link stays keyboard-focusable
-  // while invisible, same fix as OpeningScene's copyVisibility. Also hidden
-  // once the ink crossfade has covered it, so a non-receding scene's copy
-  // can't be focused or clicked through the overlay at the end of the track.
+  // — without this, the copy's links stay keyboard-focusable while invisible,
+  // same fix as OpeningScene's copyVisibility. Also hidden once the ink
+  // crossfade has covered it, so a non-receding scene's copy can't be
+  // focused or clicked through the overlay at the end of the track.
   const copyVisibility = useTransform([copyOpacity, inkOpacity], ([co, io]: number[]) =>
     co > 0.02 && io < 0.98 ? 'visible' : 'hidden',
   )
@@ -155,14 +154,6 @@ export function EnteringScene({
             <h2 className={s.galleryHeadline}>{scene.headline}</h2>
             <div className={s.side}>
               <p>{scene.body}</p>
-              {scene.kind === 'closing' &&
-                (event.applicationUrl ? (
-                  <a className={s.cta} href={event.applicationUrl}>
-                    Apply as a delegate
-                  </a>
-                ) : (
-                  <span className={s.ctaPending}>Applications open soon</span>
-                ))}
             </div>
           </div>
         </motion.div>
