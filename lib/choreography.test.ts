@@ -14,6 +14,7 @@ import {
   closingRestProgress,
   lightMovement,
   inkCrossfadeOpacity,
+  realPhotoReveal,
   type OpeningState,
   type EnteringState,
   type ClosingState,
@@ -836,6 +837,53 @@ describe('inkCrossfadeOpacity — reduced motion', () => {
   test('is always fully transparent, regardless of progress — a hard cut, not a fade', () => {
     for (const progress of [-2, 0, START, 0.9, 1, 3]) {
       assert.equal(inkCrossfadeOpacity(progress, START, true), 0)
+    }
+  })
+})
+
+// A hung painting's real-photo reveal (issue #19) — `progress` here is the
+// painting's own pass-by track, not lightMovement's entrance track. See the
+// doc comment on `realPhotoReveal` for why those are kept separate.
+describe('realPhotoReveal — before the reveal begins', () => {
+  test('is fully transparent at the start of the pass-by track', () => {
+    assert.equal(realPhotoReveal(0, false), 0)
+  })
+
+  test('the painting is still fully uncovered partway through the track', () => {
+    assert.equal(realPhotoReveal(0.3, false), 0)
+  })
+})
+
+describe('realPhotoReveal — the reveal', () => {
+  test('is fully opaque at the end of the track', () => {
+    assert.equal(realPhotoReveal(1, false), 1)
+  })
+
+  test('rises monotonically across the sweep', () => {
+    const STEPS = 500
+    let previous = realPhotoReveal(0, false)
+    for (let i = 1; i <= STEPS; i++) {
+      const current = realPhotoReveal(i / STEPS, false)
+      assert.ok(current >= previous - 1e-9, `opacity fell at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+})
+
+describe('realPhotoReveal — clamping', () => {
+  test('progress below 0 behaves like progress 0', () => {
+    assert.equal(realPhotoReveal(-3, false), realPhotoReveal(0, false))
+  })
+
+  test('progress above 1 behaves like progress 1', () => {
+    assert.equal(realPhotoReveal(4, false), realPhotoReveal(1, false))
+  })
+})
+
+describe('realPhotoReveal — reduced motion', () => {
+  test('is always fully transparent — resting state is the painting, not the real photo', () => {
+    for (const progress of [-2, 0, 0.3, 0.6, 1, 3]) {
+      assert.equal(realPhotoReveal(progress, true), 0)
     }
   })
 })

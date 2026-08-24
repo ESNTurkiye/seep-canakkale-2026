@@ -320,3 +320,31 @@ export function inkCrossfadeOpacity(progress: number, start: number, reducedMoti
   if (reducedMotion) return 0
   return ramp(clamp01(progress), start, 1, 0, 1)
 }
+
+/**
+ * Progress (within the reveal's own track — see `realPhotoReveal`) at which
+ * a hung painting's real-photo layer starts covering it.
+ */
+const realPhotoRevealStart = 0.6
+
+/**
+ * Opacity of the real-photograph layer that covers a hung, non-cinematic
+ * painting as the viewer scrolls past it — the "myth becomes reality" payoff
+ * (issue #19). `progress` is the painting's own *pass-by* track: how far the
+ * viewer has scrolled past it once it has settled into view, not the
+ * entrance track `lightMovement` uses to fade it in. Reusing that entrance
+ * track would ramp the reveal in while the painting is still arriving rather
+ * than once the viewer has genuinely scrolled past it, so `HungPainting.tsx`
+ * measures this on a second, independent scroll track. Ramps in only over
+ * the later portion of that track — the painting doesn't need its own
+ * opacity animation; the photo simply covers it as it fades in. A pure
+ * function of scroll position, like every other scroll-linked effect on the
+ * site, so scrolling back up returns the real photo to the painting with no
+ * separate "have I seen this" state. Under reduced motion the resting state
+ * is the painting, not the real photo — the same "hung, static" contract
+ * every other reduced-motion resting state on the site holds to.
+ */
+export function realPhotoReveal(progress: number, reducedMotion: boolean): number {
+  if (reducedMotion) return 0
+  return ramp(clamp01(progress), realPhotoRevealStart, 1, 0, 1)
+}

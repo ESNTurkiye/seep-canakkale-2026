@@ -22,9 +22,12 @@ export function StatementScene({ scene }: { scene: Scene }) {
 export function GalleryScene({
   scene,
   availability,
+  realPhotoAvailability,
 }: {
   scene: Scene
   availability: Record<string, boolean>
+  /** See issue #19 — resolved at build time in app/page.tsx, like `availability`. */
+  realPhotoAvailability: Record<string, boolean>
 }) {
   return (
     <section className={s.gallery} aria-label={scene.headline}>
@@ -40,6 +43,7 @@ export function GalleryScene({
             key={artwork.src}
             artwork={artwork}
             available={availability[artwork.src] ?? false}
+            realPhotoAvailable={realPhotoAvailability[artwork.src] ?? false}
           />
         ))}
       </div>

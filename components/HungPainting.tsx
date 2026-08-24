@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Artwork as ArtworkType } from '@/content/scenes'
-import { lightMovement } from '@/lib/choreography'
+import { lightMovement, realPhotoReveal } from '@/lib/choreography'
 import { Painting } from './Painting'
 import s from './museum.module.css'
 
@@ -16,9 +16,12 @@ import s from './museum.module.css'
 export function HungPainting({
   artwork,
   available,
+  realPhotoAvailable,
 }: {
   artwork: ArtworkType
   available: boolean
+  /** Whether the real photo behind this painting has landed. See issue #19. */
+  realPhotoAvailable: boolean
 }) {
   const ref = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
@@ -39,13 +42,32 @@ export function HungPainting({
   const opacity = useTransform(state, (st) => st.opacity)
   const y = useTransform(state, (st) => st.translateYPx)
 
+  // A second, independent track from the one above: how far the viewer has
+  // scrolled *past* the painting once it has settled into view, not how far
+  // it has entered. Reusing scrollYProgress for the real-photo reveal would
+  // front-load it into the painting's arrival — the same window
+  // lightMovement's fade-in already occupies — instead of firing once the
+  // viewer has genuinely passed it (issue #19). Runs from roughly centered
+  // in view to fully scrolled past at the top.
+  const { scrollYProgress: passProgress } = useScroll({
+    target: ref,
+    offset: ['start center', 'end start'],
+  })
+  const realPhotoOpacity = useTransform(passProgress, (p) => realPhotoReveal(p, !!reduced))
+
   return (
     <motion.figure
       ref={ref}
       className={s.hung}
       style={mounted ? { opacity, y } : undefined}
     >
-      <Painting variant="hung" artwork={artwork} available={available} />
+      <Painting
+        variant="hung"
+        artwork={artwork}
+        available={available}
+        realPhotoAvailable={realPhotoAvailable}
+        realPhotoOpacity={realPhotoOpacity}
+      />
     </motion.figure>
   )
 }

@@ -4,6 +4,7 @@ import type { Ref } from 'react'
 import type { MotionValue } from 'motion/react'
 import { motion } from 'motion/react'
 import type { Artwork as ArtworkType } from '@/content/scenes'
+import { realPhotoSrc } from '@/lib/realPhoto'
 import { Artwork } from './Artwork'
 import s from './museum.module.css'
 
@@ -23,6 +24,10 @@ type PaintingProps =
       variant: 'hung'
       artwork: ArtworkType
       available: boolean
+      /** Whether the real photo behind this painting has landed. See issue #19. */
+      realPhotoAvailable: boolean
+      /** Crossfade opacity for the real-photo layer — see `realPhotoReveal` (lib/choreography.ts). */
+      realPhotoOpacity: MotionValue<number>
     }
   | {
       /**
@@ -137,10 +142,21 @@ export function Painting(props: PaintingProps) {
     )
   }
 
+  const { realPhotoAvailable, realPhotoOpacity } = props
+
   return (
     <>
       <div className={s.hungFrame}>
         <Artwork artwork={artwork} available={available} />
+        {realPhotoAvailable && (
+          <motion.img
+            src={realPhotoSrc(artwork.src)}
+            alt=""
+            aria-hidden="true"
+            className={s.hungRealPhoto}
+            style={{ opacity: realPhotoOpacity }}
+          />
+        )}
       </div>
       <figcaption className={s.hungLabel}>
         <LabelText artwork={artwork} />
