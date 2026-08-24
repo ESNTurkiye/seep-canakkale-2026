@@ -6,12 +6,17 @@ import {
   openingPeakProgress,
   openingInkStart,
   enteringChoreography,
+  enteringRest,
   enteringPeakProgress,
   enteringInkStart,
+  closingChoreography,
+  closingRest,
+  closingRestProgress,
   lightMovement,
   inkCrossfadeOpacity,
   type OpeningState,
   type EnteringState,
+  type ClosingState,
 } from './choreography.ts'
 
 // Arbitrary but fixed "cover" — the measured scale the hung painting needs
@@ -610,6 +615,127 @@ describe('enteringChoreography — recede: false — clamping and reduced motion
     }
     for (const progress of [-2, 0, 0.5, 1, 3]) {
       assert.deepEqual(enterHold(progress, true), rest)
+    }
+  })
+})
+
+// The closing scene (issue #18): a deliberate exception to
+// enteringChoreography. It arrives already at full bleed and only recedes,
+// down to its hung, resting size, where it holds — the mirror image of the
+// pre-reversal opening rather than the standard approach-then-recede.
+const CLOSING_PEAK = 2.4
+
+function close(progress: number, reducedMotion = false): ClosingState {
+  return closingChoreography(progress, CLOSING_PEAK, reducedMotion)
+}
+
+describe('closingChoreography — progress 0 (top of the track, full bleed)', () => {
+  test('the artwork is at its full-bleed peak scale', () => {
+    assert.equal(close(0).scale, CLOSING_PEAK)
+  })
+
+  test('the frame is fully absent', () => {
+    const state = close(0)
+    assert.equal(state.frameOpacity, 0)
+    assert.equal(state.frameWidthPx, 0)
+  })
+
+  test('the gallery wall is not visible', () => {
+    assert.equal(close(0).wallOpacity, 0)
+  })
+
+  test('the label is fully hidden', () => {
+    assert.equal(close(0).labelOpacity, 0)
+  })
+})
+
+describe('closingChoreography — at and after closingRestProgress (receded to rest, and holding)', () => {
+  test('the artwork has receded to its hung, unscaled size', () => {
+    assert.equal(close(closingRestProgress).scale, 1)
+  })
+
+  test('the frame, wall and label are all fully present', () => {
+    const state = close(closingRestProgress)
+    assert.equal(state.frameOpacity, 1)
+    assert.equal(state.frameWidthPx, 18)
+    assert.equal(state.wallOpacity, 1)
+    assert.equal(state.labelOpacity, 1)
+  })
+
+  test('the resting state holds, unchanged, for the remainder of the track', () => {
+    assert.deepEqual(close(closingRestProgress), close(1))
+  })
+})
+
+describe('closingChoreography — the recede never reverses', () => {
+  test('scale shrinks monotonically across the full sweep — it never grows again', () => {
+    const STEPS = 500
+    let previous = close(0).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = close(i / STEPS).scale
+      assert.ok(current <= previous + 1e-9, `scale grew at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+
+  test('scale never jumps across the full sweep', () => {
+    const STEPS = 2000
+    let maxDelta = 0
+    let previous = close(0).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = close(i / STEPS).scale
+      maxDelta = Math.max(maxDelta, Math.abs(current - previous))
+      previous = current
+    }
+    assert.ok(maxDelta < 0.01, `largest adjacent jump was ${maxDelta}`)
+  })
+
+  const increasing: Array<keyof ClosingState> = ['wallOpacity', 'frameOpacity', 'frameWidthPx', 'labelOpacity']
+
+  for (const key of increasing) {
+    test(`${key} rises monotonically across the full sweep`, () => {
+      const STEPS = 500
+      let previous = close(0)[key]
+      for (let i = 1; i <= STEPS; i++) {
+        const current = close(i / STEPS)[key]
+        assert.ok(current >= previous - 1e-9, `${key} fell at step ${i}: ${previous} -> ${current}`)
+        previous = current
+      }
+    })
+  }
+})
+
+describe('closingChoreography — clamping', () => {
+  test('progress below 0 behaves like progress 0', () => {
+    assert.deepEqual(close(-3), close(0))
+  })
+
+  test('progress above 1 behaves like progress 1', () => {
+    assert.deepEqual(close(4), close(1))
+  })
+})
+
+describe('closingChoreography — reduced motion', () => {
+  test('the resting state matches the hung-painting contract, with no copyOpacity field', () => {
+    assert.deepEqual(closingRest, {
+      scale: 1,
+      wallOpacity: 1,
+      frameOpacity: 1,
+      frameWidthPx: 18,
+      labelOpacity: 1,
+    })
+  })
+
+  // Pins the "reduced motion shows the same resting state it does today"
+  // acceptance criterion (issue #18) to the thing it claims parity with,
+  // rather than just asserting hand-copied literals twice.
+  test('matches enteringRest field-for-field, aside from the copyOpacity field it deliberately omits', () => {
+    assert.deepEqual({ ...closingRest, copyOpacity: 1 }, enteringRest)
+  })
+
+  test('every input returns the resting state', () => {
+    for (const progress of [-2, 0, 0.2, closingRestProgress, 0.7, 1, 3]) {
+      assert.deepEqual(close(progress, true), closingRest)
     }
   })
 })

@@ -194,6 +194,90 @@ export function enteringChoreography(
   }
 }
 
+export type ClosingState = {
+  scale: number
+  wallOpacity: number
+  frameOpacity: number
+  frameWidthPx: number
+  labelOpacity: number
+}
+
+/**
+ * The reduced-motion resting state — the same hung-and-framed contract as
+ * `enteringRest`, minus `copyOpacity`: the closing scene's copy is never
+ * gated behind scroll progress in the first place (issue #18), so there is
+ * no field for it here.
+ */
+export const closingRest: ClosingState = {
+  scale: 1,
+  wallOpacity: 1,
+  frameOpacity: 1,
+  frameWidthPx: 18,
+  labelOpacity: 1,
+}
+
+/**
+ * Progress at which the closing scene's recede from full bleed reaches its
+ * resting, hung scale and holds. The rest of the track is a plain hold on
+ * that finished resting scene — there is no ink crossfade to reach, since
+ * this is the last scene and it does not transition anywhere; the Footer
+ * simply follows underneath in ordinary document flow once the track ends.
+ * Pinned high (rather than a fast recede with a long hold) so the recede
+ * itself covers roughly the same scroll distance as every other one-way
+ * motion on the site — compare `enteringChoreography`'s recede leg
+ * (`0.5` to `1` of a 320svh track, i.e. 160svh) and the opening's growth
+ * (`openingPeakProgress` of a 260svh track, i.e. 208svh) against this
+ * progress times `ClosingScene`'s own track height.
+ */
+export const closingRestProgress = 0.7
+
+/**
+ * The closing scene's transform values at a point in its own scroll track
+ * (issue #18). Every other cinematic scene is *entered* — hung small, grown
+ * on approach — but the closing scene arrives already alive, at full bleed,
+ * with no approach of its own: it hands off from the previous (non-cinematic)
+ * committee scene already at rest, so there is nothing to grow from. It only
+ * recedes, down to the same hung, resting size every scene settles at. This
+ * is the mirror image of the *pre-reversal* opening (see
+ * docs/adr/0005-scroll-choreography.md and the pre-#14 history of
+ * `openingChoreography`): full bleed first, hung frame after, rather than
+ * the other way around. `peak` is the measured scale the painting needs to
+ * fill the viewport at the very start of the track — uncapped and
+ * overshooting slightly, the same measurement `enteringChoreography`'s
+ * `recede: false` path uses, so the scene actually reaches full bleed
+ * instead of leaving a permanent band of gallery wall.
+ *
+ * There is deliberately no `copyOpacity` field: the headline, body and CTA
+ * are not gated behind reaching a peak the way #16 specifies for other
+ * cinematic scenes — this scene has no "approach" phase to hide them during,
+ * so the caller renders them at a constant opacity instead of reading one
+ * off this state.
+ *
+ * The four remaining ramps are an exact rescale of `enteringChoreography`'s
+ * recede leg onto `[0, closingRestProgress]` (frame 0.475–0.725 of the leg,
+ * frameWidth 0.475–0.75, label 0.6–1) and `openingChoreography`'s
+ * `wallOpacity` ramp (0.275–0.75 of its own peak progress) — the same
+ * ordering and overlap, just stretched to this scene's own rest point
+ * instead of `enteringPeakProgress`/`openingPeakProgress`.
+ */
+export function closingChoreography(
+  progress: number,
+  peak: number,
+  reducedMotion: boolean,
+): ClosingState {
+  if (reducedMotion) return closingRest
+
+  const p = clamp01(progress)
+
+  return {
+    scale: ramp(p, 0, closingRestProgress, peak, 1),
+    wallOpacity: ramp(p, 0.19, 0.53, 0, 1),
+    frameOpacity: ramp(p, 0.33, 0.51, 0, 1),
+    frameWidthPx: ramp(p, 0.33, 0.53, 0, 18),
+    labelOpacity: ramp(p, 0.42, 0.7, 0, 1),
+  }
+}
+
 export type LightMovementState = {
   opacity: number
   translateYPx: number

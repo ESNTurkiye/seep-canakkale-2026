@@ -43,18 +43,6 @@ export function GalleryScene({
           />
         ))}
       </div>
-
-      {scene.kind === 'closing' && (
-        <div className={s.side}>
-          {event.applicationUrl ? (
-            <a className={s.cta} href={event.applicationUrl}>
-              Apply as a delegate
-            </a>
-          ) : (
-            <span className={s.ctaPending}>Applications open soon</span>
-          )}
-        </div>
-      )}
     </section>
   )
 }

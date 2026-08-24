@@ -2,6 +2,7 @@ import { scenes } from '@/content/scenes'
 import { imageAvailability, videoAvailable } from '@/lib/availability'
 import { OpeningScene } from '@/components/OpeningScene'
 import { EnteringScene } from '@/components/EnteringScene'
+import { ClosingScene } from '@/components/ClosingScene'
 import { StatementScene, GalleryScene, PortraitWall, Footer } from '@/components/Scenes'
 
 export default function Home() {
@@ -24,6 +25,15 @@ export default function Home() {
             return <StatementScene key={scene.id} scene={scene} />
           case 'portraits':
             return <PortraitWall key={scene.id} scene={scene} availability={availability} />
+          case 'closing':
+            return (
+              <ClosingScene
+                key={scene.id}
+                scene={scene}
+                available={availability[scene.artworks[0].src] ?? false}
+                videoAvailable={videoAvailable(scene.artworks[0].src)}
+              />
+            )
           default:
             return scene.cinematic ? (
               <EnteringScene
