@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useScroll, useTransform, useReducedMotion } from 'motion/react'
+import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
 import { enteringChoreography } from '@/lib/choreography'
@@ -63,7 +63,14 @@ export function EnteringScene({
   // recreated on every render, so useTransform always sees the latest value.
   const state = useTransform(scrollYProgress, (p) => enteringChoreography(p, peak, !!reduced))
   const scale = useTransform(state, (st) => st.scale)
+  const frameOpacity = useTransform(state, (st) => st.frameOpacity)
+  const frameWidth = useTransform(state, (st) => `${st.frameWidthPx}px`)
+  const copyOpacity = useTransform(state, (st) => st.copyOpacity)
   const labelOpacity = useTransform(state, (st) => st.labelOpacity)
+  // copyOpacity sits near 0 at both ends of the track (see enteringChoreography)
+  // — without this, the closing scene's CTA link stays keyboard-focusable
+  // while invisible, same fix as OpeningScene's copyVisibility.
+  const copyVisibility = useTransform(copyOpacity, (co) => (co > 0.02 ? 'visible' : 'hidden'))
 
   const artwork = scene.artworks[0]
   const available = availability[artwork.src] ?? false
@@ -85,11 +92,13 @@ export function EnteringScene({
             available={available}
             boxRef={boxRef}
             scale={scale}
+            frameOpacity={frameOpacity}
+            frameWidth={frameWidth}
             labelOpacity={labelOpacity}
           />
         </div>
 
-        <div className={s.copy}>
+        <motion.div className={s.copy} style={{ opacity: copyOpacity, visibility: copyVisibility }}>
           <p className="eyebrow">{scene.eyebrow}</p>
           <div />
           <div className={s.copyBottom}>
@@ -106,7 +115,7 @@ export function EnteringScene({
                 ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

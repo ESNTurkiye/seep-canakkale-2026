@@ -44,15 +44,18 @@ type PaintingProps =
     }
   | {
       /**
-       * A later scene's approach and recede: already hung, so the frame is
-       * always present — only scale and the label's opacity move, driven by
-       * enteringChoreography. See ADR-0005.
+       * A later scene's approach and recede: already hung, so the frame
+       * fades out and the copy fades in as it nears peak scale, then plays
+       * back in reverse on the way out — driven by enteringChoreography. See
+       * ADR-0005 and issue #16.
        */
       variant: 'entering'
       artwork: ArtworkType
       available: boolean
       boxRef: Ref<HTMLDivElement>
       scale: MotionValue<number>
+      frameOpacity: MotionValue<number>
+      frameWidth: MotionValue<string>
       labelOpacity: MotionValue<number>
     }
 
@@ -99,19 +102,22 @@ export function Painting(props: PaintingProps) {
   }
 
   if (props.variant === 'entering') {
-    const { boxRef, scale, labelOpacity } = props
+    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity } = props
     return (
       // Grouped with the label as one unit, rather than the opening's
       // separately overlaid label: the opening never shows copy and label at
-      // once (see openingChoreography's timing), but an entering scene's copy
-      // is always on screen, so its label travels with the painting instead
-      // of pinning to the viewport bottom where the copy already lives.
+      // once (see openingChoreography's timing), but an entering scene's
+      // label travels with the painting instead of pinning to the viewport
+      // bottom, where the copy fades in as the frame fades out (issue #16).
       <div className={s.enteringGroup}>
         <motion.div ref={boxRef} className={s.enteringPainting} style={{ scale }}>
           <div className={s.paintingInner}>
             <Artwork artwork={artwork} available={available} />
           </div>
-          <div className={s.frame} />
+          <motion.div
+            className={s.frame}
+            style={{ opacity: frameOpacity, borderWidth: frameWidth }}
+          />
         </motion.div>
         <motion.div className={s.enteringLabel} style={{ opacity: labelOpacity }}>
           <LabelText artwork={artwork} />
