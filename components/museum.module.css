@@ -82,8 +82,9 @@
   display: block;
 }
 
-/* The gilt frame, revealed as the artwork recedes. Opening overrides
-   border-width inline as it animates in; entering scenes use this default. */
+/* The gilt frame, revealed as the artwork recedes. Both opening and entering
+   scenes override border-width inline as they animate; this is just the
+   base declaration the inline override composes onto. */
 .frame {
   position: absolute;
   inset: 0;

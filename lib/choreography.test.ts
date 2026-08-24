@@ -9,6 +9,7 @@ import {
   lightMovement,
   inkCrossfadeOpacity,
   type OpeningState,
+  type EnteringState,
 } from './choreography.ts'
 
 // Arbitrary but fixed "cover" — the measured scale the hung painting needs
@@ -253,6 +254,107 @@ describe('enteringChoreography — at rest, before and after the approach', () =
   test('at the end of the track the painting has receded back to its hung size', () => {
     assert.equal(enter(1).scale, 1)
   })
+
+  test('the frame is fully present at both ends of the track', () => {
+    assert.equal(enter(0).frameOpacity, 1)
+    assert.equal(enter(0).frameWidthPx, 18)
+    assert.equal(enter(1).frameOpacity, 1)
+    assert.equal(enter(1).frameWidthPx, 18)
+  })
+
+  test('the copy is fully hidden at both ends of the track', () => {
+    assert.equal(enter(0).copyOpacity, 0)
+    assert.equal(enter(1).copyOpacity, 0)
+  })
+})
+
+describe('enteringChoreography — the frame fades out and the copy fades in as the painting nears peak scale', () => {
+  // Mirrors the reversed opening's peak behaviour (#14, see
+  // openingChoreography), then plays back in reverse on the way out.
+  test('at the peak the frame has fully faded out and the copy is fully visible', () => {
+    const state = enter(0.5)
+    assert.equal(state.frameOpacity, 0)
+    assert.equal(state.frameWidthPx, 0)
+    assert.equal(state.copyOpacity, 1)
+  })
+
+  test('the frame is still fully present immediately after the start of the approach', () => {
+    assert.equal(enter(0.01).frameOpacity, 1)
+  })
+
+  test('the frame is still fully present immediately before the end of the recede', () => {
+    assert.equal(enter(0.99).frameOpacity, 1)
+  })
+
+  function firstProgressWhereFrameIsGone(): number {
+    const RESOLUTION = 1000
+    for (let i = 0; i <= RESOLUTION; i++) {
+      const p = i / RESOLUTION
+      if (enter(p).frameOpacity === 0) return p
+    }
+    throw new Error('frame never fully fades out on the approach')
+  }
+
+  function lastProgressWhereFrameIsGone(): number {
+    const RESOLUTION = 1000
+    for (let i = RESOLUTION; i >= 0; i--) {
+      const p = i / RESOLUTION
+      if (enter(p).frameOpacity === 0) return p
+    }
+    throw new Error('frame never fully fades out on the recede')
+  }
+
+  test('the frame has fully faded out well before the copy reaches full opacity on approach', () => {
+    const p = firstProgressWhereFrameIsGone()
+    assert.ok(p < 0.5, `expected the frame to fully fade out before the peak, got ${p}`)
+    assert.ok(
+      enter(p).copyOpacity < 0.7,
+      `expected the copy to still be short of full opacity when the frame finishes fading out, got ${enter(p).copyOpacity}`,
+    )
+  })
+
+  test('the copy is still well short of full opacity once the frame starts fading back in on recede', () => {
+    const p = lastProgressWhereFrameIsGone()
+    assert.ok(p > 0.5, `expected the frame to still be gone just after the peak, got ${p}`)
+    assert.ok(
+      enter(p).copyOpacity < 0.7,
+      `expected the copy to already be well short of full opacity once the frame starts returning, got ${enter(p).copyOpacity}`,
+    )
+  })
+})
+
+describe('enteringChoreography — frame and copy motion never reverses within a leg', () => {
+  test('on approach, frame opacity/width fall and copy opacity rises monotonically', () => {
+    const STEPS = 300
+    let prevFrame = enter(0).frameOpacity
+    let prevWidth = enter(0).frameWidthPx
+    let prevCopy = enter(0).copyOpacity
+    for (let i = 1; i <= STEPS; i++) {
+      const state = enter((i / STEPS) * 0.5)
+      assert.ok(state.frameOpacity <= prevFrame + 1e-9, `frameOpacity rose at step ${i}`)
+      assert.ok(state.frameWidthPx <= prevWidth + 1e-9, `frameWidthPx rose at step ${i}`)
+      assert.ok(state.copyOpacity >= prevCopy - 1e-9, `copyOpacity fell at step ${i}`)
+      prevFrame = state.frameOpacity
+      prevWidth = state.frameWidthPx
+      prevCopy = state.copyOpacity
+    }
+  })
+
+  test('on recede, frame opacity/width rise and copy opacity falls monotonically', () => {
+    const STEPS = 300
+    let prevFrame = enter(0.5).frameOpacity
+    let prevWidth = enter(0.5).frameWidthPx
+    let prevCopy = enter(0.5).copyOpacity
+    for (let i = 1; i <= STEPS; i++) {
+      const state = enter(0.5 + (i / STEPS) * 0.5)
+      assert.ok(state.frameOpacity >= prevFrame - 1e-9, `frameOpacity fell at step ${i}`)
+      assert.ok(state.frameWidthPx >= prevWidth - 1e-9, `frameWidthPx fell at step ${i}`)
+      assert.ok(state.copyOpacity <= prevCopy + 1e-9, `copyOpacity rose at step ${i}`)
+      prevFrame = state.frameOpacity
+      prevWidth = state.frameWidthPx
+      prevCopy = state.copyOpacity
+    }
+  })
 })
 
 describe('enteringChoreography — the approach fills the viewport', () => {
@@ -314,9 +416,16 @@ describe('enteringChoreography — clamping', () => {
 })
 
 describe('enteringChoreography — reduced motion', () => {
-  test('every input returns the hung resting state, unscaled, label visible', () => {
+  test('every input returns the hung resting state — frame, copy, and label all shown at once', () => {
+    const rest: EnteringState = {
+      scale: 1,
+      frameOpacity: 1,
+      frameWidthPx: 18,
+      copyOpacity: 1,
+      labelOpacity: 1,
+    }
     for (const progress of [-2, 0, 0.5, 1, 3]) {
-      assert.deepEqual(enter(progress, true), { scale: 1, labelOpacity: 1 })
+      assert.deepEqual(enter(progress, true), rest)
     }
   })
 })

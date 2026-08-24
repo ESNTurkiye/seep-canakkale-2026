@@ -38,19 +38,32 @@ export const openingRest: OpeningState = {
 
 export type EnteringState = {
   scale: number
+  frameOpacity: number
+  frameWidthPx: number
+  copyOpacity: number
   labelOpacity: number
 }
 
-/** The reduced-motion resting state: painting hung at its unscaled size. */
+/**
+ * The reduced-motion resting state: painting hung, frame visible, copy and
+ * label all shown at once — see ADR-0005.
+ */
 export const enteringRest: EnteringState = {
   scale: 1,
+  frameOpacity: 1,
+  frameWidthPx: 18,
+  copyOpacity: 1,
   labelOpacity: 1,
 }
 
 /**
  * A later scene's transform values at a point in its own scroll track: the
  * hung painting grows as it is approached and recedes as it is passed. `peak`
- * is the measured scale it needs to fill the viewport at the midpoint.
+ * is the measured scale it needs to fill the viewport at the midpoint. The
+ * frame/copy crossfade mirrors the opening's peak behaviour (#14, see
+ * openingChoreography) on the way in, then plays back in reverse on the way
+ * out: frame back in, copy back out — symmetric with the approach, since
+ * (unlike the opening) this scene both approaches and recedes.
  */
 export function enteringChoreography(
   progress: number,
@@ -63,6 +76,9 @@ export function enteringChoreography(
 
   return {
     scale: p < 0.5 ? ramp(p, 0, 0.5, 1, peak) : ramp(p, 0.5, 1, peak, 1),
+    frameOpacity: p < 0.5 ? ramp(p, 0.14, 0.26, 1, 0) : ramp(p, 0.74, 0.86, 0, 1),
+    frameWidthPx: p < 0.5 ? ramp(p, 0.12, 0.26, 18, 0) : ramp(p, 0.74, 0.88, 0, 18),
+    copyOpacity: p < 0.5 ? ramp(p, 0.21, 0.325, 0, 1) : ramp(p, 0.675, 0.79, 1, 0),
     labelOpacity: p < 0.5 ? ramp(p, 0, 0.2, 1, 0) : ramp(p, 0.8, 1, 0, 1),
   }
 }
