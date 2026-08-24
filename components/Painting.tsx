@@ -26,7 +26,7 @@ type PaintingProps =
     }
   | {
       /**
-       * The opening's receding reveal: the frame and label are driven by
+       * The opening's growing reveal: the frame and label are driven by
        * openingChoreography rather than shown at rest. See ADR-0005.
        */
       variant: 'opening'
@@ -73,7 +73,10 @@ export function Painting(props: PaintingProps) {
         <motion.div
           ref={boxRef}
           className={s.painting}
-          style={{ width: 'min(88vw, calc(88svh * 16 / 9))', scale }}
+          // Same resting size as every other hung painting on the site (see
+          // .enteringPainting) — scale 1 now *is* the hung, resting frame,
+          // not an intermediate size shrunk further by a separate multiplier.
+          style={{ width: 'min(52vw, calc(52svh * 16 / 9))', scale }}
         >
           <div className={s.paintingInner}>
             <Artwork

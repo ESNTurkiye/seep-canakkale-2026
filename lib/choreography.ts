@@ -1,8 +1,9 @@
 /**
  * Pure scroll choreography: progress in, transform values out. No DOM, React,
  * or animation-library reference, so it can be tested without a browser — see
- * docs/adr/0005-scroll-choreography.md. The opening recedes; later scenes are
- * entered using the same ramp/smoothstep primitives.
+ * docs/adr/0005-scroll-choreography.md. The opening grows from a small hung
+ * frame into full bleed; later scenes are entered using the same
+ * ramp/smoothstep primitives.
  */
 
 const smoothstep = (t: number) => t * t * (3 - 2 * t)
@@ -94,8 +95,14 @@ export function lightMovement(progress: number, reducedMotion: boolean): LightMo
 }
 
 /**
- * The opening scene's transform values at a point in the scroll. `cover` is
- * the measured scale the hung painting needs to fill the viewport at rest.
+ * The opening scene's transform values at a point in the scroll: a single
+ * monotonic ramp from the small hung painting up to full bleed, the museum
+ * framing device established before the myth comes alive — see
+ * docs/adr/0005-scroll-choreography.md. `cover` is the measured scale the hung
+ * painting needs to fill the viewport at rest; `peak` overshoots it slightly
+ * so full bleed reads as a bleed rather than a flush fit. At peak the scene
+ * hands off to the next one via the ink-crossfade transition rather than
+ * resting.
  */
 export function openingChoreography(
   progress: number,
@@ -105,14 +112,14 @@ export function openingChoreography(
   if (reducedMotion) return openingRest
 
   const p = clamp01(progress)
-  const start = cover * 1.06
+  const peak = cover * 1.06
 
   return {
-    scale: p < 0.55 ? ramp(p, 0, 0.55, start, 1) : ramp(p, 0.55, 1, 1, 0.62),
-    wallOpacity: ramp(p, 0.2, 0.7, 0, 1),
-    frameOpacity: ramp(p, 0.3, 0.62, 0, 1),
-    frameWidthPx: ramp(p, 0.3, 0.68, 0, 18),
-    copyOpacity: ramp(p, 0.18, 0.44, 1, 0),
-    labelOpacity: ramp(p, 0.74, 0.95, 0, 1),
+    scale: ramp(p, 0, 1, 1, peak),
+    wallOpacity: ramp(p, 0.3, 0.8, 1, 0),
+    frameOpacity: ramp(p, 0.38, 0.7, 1, 0),
+    frameWidthPx: ramp(p, 0.32, 0.7, 18, 0),
+    copyOpacity: ramp(p, 0.56, 0.82, 0, 1),
+    labelOpacity: ramp(p, 0.05, 0.26, 1, 0),
   }
 }

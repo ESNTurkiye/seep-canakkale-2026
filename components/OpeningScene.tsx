@@ -10,10 +10,10 @@ import { Painting } from './Painting'
 import s from './museum.module.css'
 
 /**
- * The opening: the viewer starts inside the painting and scrolls backwards out
- * of it until the frame, then the gallery wall, appear around it. This is the
- * device the whole site is built on — every later scene is a painting already
- * hanging on that wall.
+ * The opening: the viewer starts on the small painting hanging on the wall,
+ * and scrolling grows it into the full-bleed video hero. This establishes the
+ * museum framing device — a painting on a wall — before the myth comes alive.
+ * Every later scene is a painting already hanging on that same wall.
  */
 export function OpeningScene({
   scene,
@@ -68,6 +68,9 @@ export function OpeningScene({
   const frameWidth = useTransform(state, (st) => `${st.frameWidthPx}px`)
   const copyOpacity = useTransform(state, (st) => st.copyOpacity)
   const labelOpacity = useTransform(state, (st) => st.labelOpacity)
+  // copyOpacity starts at 0 (see openingChoreography) — without this, the CTA
+  // link inside stays keyboard-focusable while fully invisible at page load.
+  const copyVisibility = useTransform(copyOpacity, (o) => (o > 0.02 ? 'visible' : 'hidden'))
 
   const artwork = scene.artworks[0]
 
@@ -75,7 +78,11 @@ export function OpeningScene({
     <section
       ref={trackRef}
       className={s.track}
-      style={{ height: trackCollapsed ? '100svh' : '340svh' }}
+      // EnteringScene's 320svh is a full approach-and-recede round trip, i.e.
+      // ~160svh one-way; the opening only grows one-way but needs a bit more
+      // for the copy fade-in to land after full bleed, hence 220svh. Estimate
+      // — remeasure by scrolling once real content is in place.
+      style={{ height: trackCollapsed ? '100svh' : '220svh' }}
       aria-label={scene.headline}
     >
       <div className={s.stage}>
@@ -96,7 +103,7 @@ export function OpeningScene({
           />
         </div>
 
-        <motion.div className={s.copy} style={{ opacity: copyOpacity }}>
+        <motion.div className={s.copy} style={{ opacity: copyOpacity, visibility: copyVisibility }}>
           <p className="eyebrow">{scene.eyebrow}</p>
           <div />
           <div className={s.copyBottom}>
