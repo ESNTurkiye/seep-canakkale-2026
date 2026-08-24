@@ -309,6 +309,16 @@
   display: block;
 }
 
+/* The real-photo crossfade layer (issue #19) — sized/fit by `.hungFrame img`
+   above like every other image in the frame; this only stacks it over the
+   painting and keeps it hidden until scroll reveals it. */
+.hungRealPhoto {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .hungLabel {
   text-align: center;
   display: grid;

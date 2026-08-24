@@ -3,6 +3,7 @@ import path from 'node:path'
 import { scenes } from '@/content/scenes'
 import { oc } from '@/content/oc'
 import { videoBase } from './videoBase'
+import { realPhotoSrc } from './realPhoto'
 
 /**
  * Which generated images actually exist, resolved at build time.
@@ -33,4 +34,14 @@ export function imageAvailability(): Record<string, boolean> {
 export function videoAvailable(src: string): boolean {
   const base = path.join(process.cwd(), 'public', videoBase(src))
   return fs.existsSync(`${base}.mp4`) && fs.existsSync(`${base}.webm`)
+}
+
+/**
+ * Whether the real photograph behind a hung painting has landed (issue
+ * #19) — a scene must render exactly as it does today, painting only, until
+ * it has. `src` is an `Artwork.src`; the real photo sits next to the still
+ * under `realPhotoSrc()`'s naming convention.
+ */
+export function realPhotoAvailable(src: string): boolean {
+  return fs.existsSync(path.join(process.cwd(), 'public', realPhotoSrc(src)))
 }

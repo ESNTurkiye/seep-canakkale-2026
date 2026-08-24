@@ -1,5 +1,5 @@
 import { scenes } from '@/content/scenes'
-import { imageAvailability, videoAvailable } from '@/lib/availability'
+import { imageAvailability, videoAvailable, realPhotoAvailable } from '@/lib/availability'
 import { OpeningScene } from '@/components/OpeningScene'
 import { EnteringScene } from '@/components/EnteringScene'
 import { ClosingScene } from '@/components/ClosingScene'
@@ -7,6 +7,9 @@ import { StatementScene, GalleryScene, PortraitWall, Footer } from '@/components
 
 export default function Home() {
   const availability = imageAvailability()
+  const realPhotoAvailability = Object.fromEntries(
+    scenes.flatMap((scene) => scene.artworks.map((artwork) => [artwork.src, realPhotoAvailable(artwork.src)])),
+  )
 
   return (
     <main>
@@ -43,7 +46,12 @@ export default function Home() {
                 videoAvailable={videoAvailable(scene.artworks[0].src)}
               />
             ) : (
-              <GalleryScene key={scene.id} scene={scene} availability={availability} />
+              <GalleryScene
+                key={scene.id}
+                scene={scene}
+                availability={availability}
+                realPhotoAvailability={realPhotoAvailability}
+              />
             )
         }
       })}
