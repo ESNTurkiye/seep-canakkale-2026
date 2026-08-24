@@ -44,10 +44,11 @@ type PaintingProps =
     }
   | {
       /**
-       * A later scene's approach and recede: already hung, so the frame
-       * fades out and the copy fades in as it nears peak scale, then plays
-       * back in reverse on the way out — driven by enteringChoreography. See
-       * ADR-0005 and issue #16.
+       * A later scene's approach: already hung, so the frame fades out and
+       * the copy fades in as it nears peak scale — driven by
+       * enteringChoreography. By default (recede: true, the standard
+       * gallery walk-past) it then plays back in reverse on the way out;
+       * see ADR-0005 and issues #16/#17.
        */
       variant: 'entering'
       artwork: ArtworkType
@@ -57,6 +58,10 @@ type PaintingProps =
       frameOpacity: MotionValue<number>
       frameWidth: MotionValue<string>
       labelOpacity: MotionValue<number>
+      /** Whether this artwork's animated loop has landed. See ADR-0006. */
+      videoAvailable: boolean
+      /** Resolved (hydration-safe) reduced-motion preference. See ADR-0006. */
+      reducedMotion: boolean
     }
 
 /**
@@ -102,7 +107,8 @@ export function Painting(props: PaintingProps) {
   }
 
   if (props.variant === 'entering') {
-    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity } = props
+    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity, videoAvailable, reducedMotion } =
+      props
     return (
       // Grouped with the label as one unit, rather than the opening's
       // separately overlaid label: the opening never shows copy and label at
@@ -112,7 +118,12 @@ export function Painting(props: PaintingProps) {
       <div className={s.enteringGroup}>
         <motion.div ref={boxRef} className={s.enteringPainting} style={{ scale }}>
           <div className={s.paintingInner}>
-            <Artwork artwork={artwork} available={available} />
+            <Artwork
+              artwork={artwork}
+              available={available}
+              video={videoAvailable}
+              reducedMotion={reducedMotion}
+            />
           </div>
           <motion.div
             className={s.frame}

@@ -6,6 +6,8 @@ import {
   openingPeakProgress,
   openingInkStart,
   enteringChoreography,
+  enteringPeakProgress,
+  enteringInkStart,
   lightMovement,
   inkCrossfadeOpacity,
   type OpeningState,
@@ -419,6 +421,7 @@ describe('enteringChoreography — reduced motion', () => {
   test('every input returns the hung resting state — frame, copy, and label all shown at once', () => {
     const rest: EnteringState = {
       scale: 1,
+      wallOpacity: 1,
       frameOpacity: 1,
       frameWidthPx: 18,
       copyOpacity: 1,
@@ -426,6 +429,187 @@ describe('enteringChoreography — reduced motion', () => {
     }
     for (const progress of [-2, 0, 0.5, 1, 3]) {
       assert.deepEqual(enter(progress, true), rest)
+    }
+  })
+})
+
+// A non-receding entering scene (issue #17, `content/scenes.ts`'s
+// `recede: false`): reaches peak and holds, handing off via the ink
+// crossfade instead of receding back to its hung size — the opening's shape
+// (#14) rather than a gallery walk-past.
+function enterHold(progress: number, reducedMotion = false) {
+  return enteringChoreography(progress, PEAK, reducedMotion, false)
+}
+
+describe('enteringChoreography — recede: false — progress 0 (hung and framed)', () => {
+  test('the artwork is at its hung, unscaled size', () => {
+    assert.equal(enterHold(0).scale, 1)
+  })
+
+  test('the frame is fully present', () => {
+    assert.equal(enterHold(0).frameOpacity, 1)
+    assert.equal(enterHold(0).frameWidthPx, 18)
+  })
+
+  test('the copy is fully hidden', () => {
+    assert.equal(enterHold(0).copyOpacity, 0)
+  })
+
+  test('the gallery wall is fully present', () => {
+    assert.equal(enterHold(0).wallOpacity, 1)
+  })
+})
+
+describe('enteringChoreography — recede: false — progress 1 (full bleed, no recede)', () => {
+  test('the artwork is at its peak scale, not back at its hung size', () => {
+    assert.equal(enterHold(1).scale, PEAK)
+  })
+
+  test('the frame is fully absent', () => {
+    assert.equal(enterHold(1).frameOpacity, 0)
+    assert.equal(enterHold(1).frameWidthPx, 0)
+  })
+
+  test('the copy is fully visible', () => {
+    assert.equal(enterHold(1).copyOpacity, 1)
+  })
+
+  test('the gallery wall is not visible — whatever the painting does not cover reads as ink, not wall', () => {
+    assert.equal(enterHold(1).wallOpacity, 0)
+  })
+})
+
+describe('enteringChoreography — recede: false — scale settles at peak before the ink crossfade starts', () => {
+  // Same ordering guarantee openingChoreography's peak/inkStart pair
+  // provides — see the equivalent openingChoreography describe block above.
+  test('enteringInkStart is not before enteringPeakProgress', () => {
+    assert.ok(enteringInkStart >= enteringPeakProgress)
+  })
+
+  test('scale has already reached peak by enteringPeakProgress', () => {
+    assert.equal(enterHold(enteringPeakProgress).scale, PEAK)
+  })
+
+  test('scale is still at peak, unchanged, once the ink crossfade begins', () => {
+    assert.equal(enterHold(enteringInkStart).scale, PEAK)
+  })
+})
+
+describe('enteringChoreography — recede: false — the frame fades out before the copy has fully faded in', () => {
+  // Mirrors the equivalent openingChoreography describe block above — the two
+  // share timing via approachCrossfade, so this exercises the same ordering.
+  function firstProgressWhereFrameIsGone(): number {
+    const RESOLUTION = 2000
+    for (let i = 0; i <= RESOLUTION; i++) {
+      const p = i / RESOLUTION
+      if (enterHold(p).frameOpacity === 0) return p
+    }
+    throw new Error('frame never fully fades out across [0, 1]')
+  }
+
+  test('the frame is still fully present immediately after the top of the scroll', () => {
+    assert.equal(enterHold(0.01).frameOpacity, 1)
+  })
+
+  test('the frame has fully faded out well before the copy reaches full opacity', () => {
+    const p = firstProgressWhereFrameIsGone()
+    assert.ok(p < 1, `expected the frame to fully fade out before p=1, got ${p}`)
+    assert.ok(
+      enterHold(p).copyOpacity < 0.7,
+      `expected the copy to still be well short of full opacity when the frame finishes fading out, got ${enterHold(p).copyOpacity}`,
+    )
+  })
+})
+
+describe('enteringChoreography — recede: false — the label and the headline copy are never both visible', () => {
+  // The entering variant renders the label attached to the painting (unlike
+  // the opening's separately overlaid label), so an overlap here would be a
+  // visible collision, not just a timing curiosity.
+  test('across the full sweep, at most one of labelOpacity and copyOpacity is ever nonzero', () => {
+    const STEPS = 1000
+    for (let i = 0; i <= STEPS; i++) {
+      const state = enterHold(i / STEPS)
+      assert.ok(
+        state.labelOpacity === 0 || state.copyOpacity === 0,
+        `both visible at p=${i / STEPS}: label=${state.labelOpacity}, copy=${state.copyOpacity}`,
+      )
+    }
+  })
+})
+
+describe('enteringChoreography — recede: false — continuity and monotonicity', () => {
+  test('scale grows monotonically across the full sweep — it never recedes', () => {
+    const STEPS = 500
+    let previous = enterHold(0).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = enterHold(i / STEPS).scale
+      assert.ok(current >= previous - 1e-9, `scale decreased at step ${i}: ${previous} -> ${current}`)
+      previous = current
+    }
+  })
+
+  test('scale never jumps across the full sweep', () => {
+    // Same threshold and reasoning as openingChoreography's equivalent test
+    // above — scale is the property that must read as one continuous grow.
+    const STEPS = 2000
+    let maxDelta = 0
+    let previous = enterHold(0).scale
+    for (let i = 1; i <= STEPS; i++) {
+      const current = enterHold(i / STEPS).scale
+      maxDelta = Math.max(maxDelta, Math.abs(current - previous))
+      previous = current
+    }
+    assert.ok(maxDelta < 0.01, `largest adjacent jump was ${maxDelta}`)
+  })
+
+  const decreasing: Array<keyof EnteringState> = ['wallOpacity', 'frameOpacity', 'frameWidthPx', 'labelOpacity']
+  const increasing: Array<keyof EnteringState> = ['copyOpacity']
+
+  for (const key of decreasing) {
+    test(`${key} falls monotonically across the full sweep`, () => {
+      const STEPS = 500
+      let previous = enterHold(0)[key]
+      for (let i = 1; i <= STEPS; i++) {
+        const current = enterHold(i / STEPS)[key]
+        assert.ok(current <= previous + 1e-9, `${key} rose at step ${i}: ${previous} -> ${current}`)
+        previous = current
+      }
+    })
+  }
+
+  for (const key of increasing) {
+    test(`${key} rises monotonically across the full sweep`, () => {
+      const STEPS = 500
+      let previous = enterHold(0)[key]
+      for (let i = 1; i <= STEPS; i++) {
+        const current = enterHold(i / STEPS)[key]
+        assert.ok(current >= previous - 1e-9, `${key} fell at step ${i}: ${previous} -> ${current}`)
+        previous = current
+      }
+    })
+  }
+})
+
+describe('enteringChoreography — recede: false — clamping and reduced motion', () => {
+  test('progress below 0 behaves like progress 0', () => {
+    assert.deepEqual(enterHold(-3), enterHold(0))
+  })
+
+  test('progress above 1 behaves like progress 1', () => {
+    assert.deepEqual(enterHold(4), enterHold(1))
+  })
+
+  test('every input returns the same hung resting state as the receding path', () => {
+    const rest: EnteringState = {
+      scale: 1,
+      wallOpacity: 1,
+      frameOpacity: 1,
+      frameWidthPx: 18,
+      copyOpacity: 1,
+      labelOpacity: 1,
+    }
+    for (const progress of [-2, 0, 0.5, 1, 3]) {
+      assert.deepEqual(enterHold(progress, true), rest)
     }
   })
 })

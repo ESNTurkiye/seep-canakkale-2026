@@ -89,15 +89,24 @@ Same prompt, with a plainer profile — a simpler moulding suits sixteen small f
 
 If the model cannot deliver true transparency, generate against flat magenta and cut the aperture out afterwards — but check the edges, because a halo of leftover background is visible against a dark wall.
 
-## The opening loop
+## Animated loops
 
-The opening scene is the only moving image on the site. See `docs/adr/0006-hero-loop-only-no-scrubbed-video.md`.
+Any cinematic scene may carry a moving image instead of a still, gated on file presence — not just the opening (issue #17). See `docs/adr/0006-hero-loop-only-no-scrubbed-video.md`. Most artwork on the site stays still; a scene opts in only once its pair of files actually lands.
 
-- Source: the finished `opening-trojan-horse.jpg`, animated. Do not generate a different composition.
+Shared rules for every loop, regardless of scene:
+
+- Source: the finished still, animated. Do not generate a different composition.
 - 3–4 seconds, **seamless** — the last frame must meet the first. Silent. No camera move: the scroll already moves the frame, and a second movement fights it.
-- What moves: clouds drifting, dust in the air, drapery shifting, one delegate still stepping down the ladder. Nothing else. The painting should look alive, not animated.
-- Deliver `opening-trojan-horse.mp4` and `.webm` into `public/artwork/`. The still stays as poster and fallback.
+- Deliver `<base>.mp4` and `<base>.webm` into `public/artwork/`, next to the still under the same base name. The still stays as poster and fallback.
 - If the loop is not seamless, we ship the still. A visible jump is worse than no motion.
+
+### The opening — `opening-trojan-horse`
+
+- What moves: clouds drifting, dust in the air, drapery shifting, one delegate still stepping down the ladder. Nothing else. The painting should look alive, not animated.
+
+### Why Çanakkale — `why-hero-leandros`
+
+- What moves: the water, the torch flicker, the swimmer's wake. Nothing else — Leandros himself should read as mid-stroke, not visibly progressing across the strait.
 
 ## Portraits — the sixteen Organising Committee members
 

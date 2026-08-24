@@ -1,4 +1,5 @@
 import type { Artwork as ArtworkType } from '@/content/scenes'
+import { videoBase } from '@/lib/videoBase'
 import s from './museum.module.css'
 
 /**
@@ -7,11 +8,12 @@ import s from './museum.module.css'
  * before a single image has been generated, so the placeholder is designed,
  * not broken.
  *
- * `video` opts into the opening's animated loop (docs/adr/0006) — only the
- * opening scene's artwork has one. `available` still gates the still image
- * underneath it; a missing artwork renders the placeholder regardless of
- * `video`. With no video files present, or under reduced motion, this
- * renders the exact `<img>` it always has.
+ * `video` opts an artwork into its animated loop (docs/adr/0006), gated on
+ * file presence via `videoAvailable()` — any cinematic scene may have one,
+ * not just the opening. `available` still gates the still image underneath
+ * it; a missing artwork renders the placeholder regardless of `video`. With
+ * no video files present, or under reduced motion, this renders the exact
+ * `<img>` it always has.
  */
 export function Artwork({
   artwork,
@@ -36,7 +38,7 @@ export function Artwork({
   }
 
   if (video && !reducedMotion) {
-    const base = artwork.src.replace(/\.jpg$/, '')
+    const base = videoBase(artwork.src)
     return (
       <video
         poster={artwork.src}

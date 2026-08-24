@@ -14,10 +14,14 @@ import s from './museum.module.css'
  * Driven by the calling scene's own `scrollYProgress` (it is the last child
  * of that scene's `.stage`, so it paints above everything else in the
  * scene), not a track of its own — any scene that can reach and hold a peak
- * can adopt this once it does. Always rendered, never conditionally mounted,
- * so hydration never has to reconcile its presence; `reducedMotion` collapses
- * it to permanently transparent instead — reduced motion already stacks
- * scenes with no scroll-driven animation, which is already a hard cut.
+ * can adopt this once it does. `OpeningScene` always renders it, never
+ * conditionally, so hydration never has to reconcile its presence there.
+ * `EnteringScene` (issue #17) does mount it conditionally, on `recede` —
+ * safe because `recede` comes from static content data (`content/scenes.ts`),
+ * identical on server and client, so there is nothing for hydration to
+ * reconcile either way. `reducedMotion` collapses this component to
+ * permanently transparent — reduced motion already stacks scenes with no
+ * scroll-driven animation, which is already a hard cut.
  */
 export function InkCrossfade({
   progress,
