@@ -31,6 +31,15 @@ export type Scene = {
    * portrait scenes have no single painting to choreograph.
    */
   cinematic?: boolean
+  /**
+   * Whether a cinematic scene recedes back to its hung size after reaching
+   * peak (the default, `true` — a gallery walk-past). Set to `false` for a
+   * scene that instead holds at peak and hands off to the next scene via the
+   * ink-crossfade transition (#15) without receding first — the opening's
+   * shape (#14) rather than the standard approach-then-recede. Meaningless
+   * unless `cinematic` is also set. See issue #17.
+   */
+  recede?: boolean
 }
 
 export const scenes: Scene[] = [
@@ -64,6 +73,7 @@ export const scenes: Scene[] = [
     headline: 'Getting here used to be harder.',
     body: 'A city on both sides of a strait you can see across. Troy an hour south, Assos on the cliffs, Bozcaada an hour by sea, and the Aegean doing what it has always done.',
     cinematic: true,
+    recede: false,
     artworks: [
       {
         src: '/artwork/why-hero-leandros.jpg',
@@ -172,10 +182,22 @@ export const scenes: Scene[] = [
 ]
 
 for (const scene of scenes) {
-  if (scene.cinematic && scene.artworks.length > 1) {
+  if (scene.cinematic && scene.artworks.length !== 1) {
     throw new Error(
       `Scene "${scene.id}" is marked cinematic but has ${scene.artworks.length} artworks — ` +
-        `EnteringScene only renders the first, silently dropping the rest.`,
+        `EnteringScene needs exactly one (it renders only the first, and app/page.tsx reads ` +
+        `artworks[0] directly).`,
     )
   }
+  if (scene.recede !== undefined && !scene.cinematic) {
+    throw new Error(`Scene "${scene.id}" sets \`recede\` but isn't cinematic — \`recede\` is meaningless there.`)
+  }
+}
+
+const lastScene = scenes[scenes.length - 1]
+if (lastScene.recede === false) {
+  throw new Error(
+    `Scene "${lastScene.id}" is the last scene and sets \`recede: false\` — it would crossfade to ` +
+      `ink with no next scene to hand off to.`,
+  )
 }

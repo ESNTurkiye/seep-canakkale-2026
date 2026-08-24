@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { scenes } from '@/content/scenes'
 import { oc } from '@/content/oc'
+import { videoBase } from './videoBase'
 
 /**
  * Which generated images actually exist, resolved at build time.
@@ -22,11 +23,14 @@ export function imageAvailability(): Record<string, boolean> {
 }
 
 /**
- * Whether the opening's animated loop (docs/adr/0006) has landed. Both
- * encodes are delivered together, so either missing falls back to the still
- * — the opening must render exactly as it does today with no video files.
+ * Whether a cinematic scene's animated loop (docs/adr/0006) has landed for a
+ * given artwork. Both encodes are delivered together, so either missing
+ * falls back to the still — a scene must render exactly as it does today
+ * until both files exist. `src` is an `Artwork.src` (e.g.
+ * `/artwork/opening-trojan-horse.jpg`); the video sits next to the still
+ * under the same base name.
  */
-export function openingVideoAvailable(): boolean {
-  const base = path.join(process.cwd(), 'public', 'artwork', 'opening-trojan-horse')
+export function videoAvailable(src: string): boolean {
+  const base = path.join(process.cwd(), 'public', videoBase(src))
   return fs.existsSync(`${base}.mp4`) && fs.existsSync(`${base}.webm`)
 }
