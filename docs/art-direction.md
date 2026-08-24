@@ -108,6 +108,23 @@ Shared rules for every loop, regardless of scene:
 
 - What moves: the water, the torch flicker, the swimmer's wake. Nothing else — Leandros himself should read as mid-stroke, not visibly progressing across the strait.
 
+## Real photographs — the venue reveal (issue #20)
+
+A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, `diptych` or single `artwork`, not just the two scenes below — but only these four are wanted live right now.
+
+- **Filename**: `<same-basename>-real.jpg`, next to the painting's still under `public/artwork/`. No other code change required once the file lands.
+- **Source**: an actual photograph of the real venue, not generated art — this is where the site follows through on showing the venues themselves, not just the myth.
+
+### 4a. `venues-homer-recital-real.jpg` — the plenary venue behind The Recital
+
+### 4b. `venues-judgement-of-paris-real.jpg` — the parallel-session venue behind The Choice
+
+### 6a. `evenings-intercultural-real.jpg` — the Intercultural Night venue behind The Table
+
+### 6b. `evenings-turkish-night-real.jpg` — the Turkish Night venue behind The Circle
+
+**Do not add `coffee-achilles-real.jpg` or `stay-xenia-real.jpg`.** Both scenes are non-cinematic and would pick up the reveal automatically the moment the file exists — the coffee-break exclusion (issue #20) is enforced only by withholding the asset, not by any code gate, so nobody should "helpfully" supply one.
+
 ## Portraits — the sixteen Organising Committee members
 
 Sixteen portraits hang as one wall. They will only read as one wall if the inputs are uniform, so the source photographs matter more than the prompt.
