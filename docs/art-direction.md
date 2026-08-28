@@ -235,7 +235,9 @@ The bolded sentence exists because the shared style block asks for "idealised an
 A note is for where the photograph misleads about the person, and the two that exist earn their place:
 
 - **`furkan-ucar`** — his photograph is taken in a cap, so the model had nothing above the eyebrows and invented ginger hair and a full beard. The note says he is bald.
-- **`burcu-ozdemir`** — two things. Her hair is long and curly and every take cropped or tied it; "bare neck" in the template appears to pull that way. And the note asks for light makeup and a becoming light, **which deliberately contradicts the template's "do not idealise, do not beautify"**. That was a decision taken with the host section, not a drift: the unbeautified take read gaunt and older than she is, which is its own kind of unlikeness. Do not quietly revert it — and do not generalise it, because that bolded sentence is still what protects the other fifteen.
+- **`burcu-ozdemir`** — the note fixes her pose, not her face; see "A finished portrait can be the reference" below. Six attempts from four different photographs all lost either the expression or the hair, and the one everybody preferred turned out to be the very first, which only needed straightening.
+
+**A finished portrait can be the reference.** Where a painting has the likeness but the sitter is turned, tilted or off-centre, hand that painting back in as the reference and let the note change only the pose: face the viewer square on, head level, shoulders even, centred. The likeness survives because it is no longer being derived a second time — it is being carried. This is how `burcu-ozdemir` reached the wall: her original portrait was the warmest of six attempts and the only one anybody preferred, but she sat tilted and turned while the other fifteen sit straight. Repainting from photographs kept costing the expression; reposing the painting cost nothing.
 
 A note steers a painting back towards the person. It is not a licence to change someone into somebody else, and it never removes the approval in `docs/adr/0002-ai-generated-oc-portraits.md` — the member sees the finished portrait and says yes, note or no note.
 
