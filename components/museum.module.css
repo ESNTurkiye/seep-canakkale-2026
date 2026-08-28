@@ -400,6 +400,11 @@
      collects under the text instead: sixteen frames, sixteen names on one
      line, whatever the roles beneath them run to. */
   align-content: start;
+  /* Centred, like the label under a hung painting — the wall is one set of
+     framed objects and its captions should be set the same way throughout.
+     A role that wraps to three lines then stays centred under its own frame
+     instead of hanging off one edge of it. */
+  text-align: center;
 }
 
 .portraitFrame {
