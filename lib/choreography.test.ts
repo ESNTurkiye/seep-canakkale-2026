@@ -2,6 +2,7 @@ import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   FRAME_WIDTH_PX,
+  approachPeak,
   openingChoreography,
   openingRest,
   openingPeakProgress,
@@ -21,15 +22,85 @@ import {
   type ClosingState,
 } from './choreography.ts'
 
-// Arbitrary but fixed "cover" — the measured scale the hung painting needs
-// at rest. Real value comes from a DOM measurement; any positive number
-// exercises the same math.
+// Arbitrary but fixed peak — the scale the hung painting has to reach to fill
+// the viewport, which the real caller measures through `approachPeak` (tested
+// separately below). Any value above 1 exercises the same math.
 const COVER = 1.2
 const PEAK_SCALE = COVER * 1.06
 
 function choreograph(progress: number, reducedMotion = false): OpeningState {
-  return openingChoreography(progress, COVER, reducedMotion)
+  return openingChoreography(progress, PEAK_SCALE, reducedMotion)
 }
+
+// A desktop viewport and the painting as it is laid out on one: the hung box
+// at --rest-width, plus its label centred underneath. Wide enough that a 16:9
+// painting can cover it without losing much of itself off the sides.
+const DESKTOP = {
+  viewportWidth: 1512,
+  viewportHeight: 900,
+  boxWidth: 786,
+  boxHeight: 442,
+  below: 90,
+}
+
+// The same measurement on a phone held upright, where covering the screen
+// would mean growing the painting to three and a half times its width.
+const PHONE = {
+  viewportWidth: 390,
+  viewportHeight: 844,
+  boxWidth: 234,
+  boxHeight: 132,
+  below: 80,
+}
+
+describe('approachPeak — a screen the painting can cover', () => {
+  const peak = approachPeak({ ...DESKTOP, overshoot: 1.06 })
+
+  test('the painting covers the viewport in both directions', () => {
+    assert.ok(DESKTOP.boxWidth * peak >= DESKTOP.viewportWidth)
+    assert.ok(DESKTOP.boxHeight * peak >= DESKTOP.viewportHeight)
+  })
+
+  test('and bleeds past it rather than fitting flush against an edge', () => {
+    const flush = approachPeak({ ...DESKTOP })
+    assert.ok(peak > flush)
+  })
+})
+
+describe('approachPeak — a phone held upright', () => {
+  const peak = approachPeak({ ...PHONE, overshoot: 1.06 })
+
+  test('the painting grows to exactly the width of the screen, never past it', () => {
+    // The whole point: at the peak of the approach every last pixel of the
+    // artwork's width is on screen. Covering this screen would have thrown
+    // three quarters of it off the sides.
+    assert.equal(PHONE.boxWidth * peak, PHONE.viewportWidth)
+  })
+
+  test('so it does not reach the top and bottom edges — wall is left above and below', () => {
+    assert.ok(PHONE.boxHeight * peak < PHONE.viewportHeight)
+  })
+
+  test('the overshoot is not applied — there is no edge left to bleed past', () => {
+    assert.equal(peak, approachPeak({ ...PHONE }))
+  })
+
+  test('and it is still an approach: the painting grows from where it hangs', () => {
+    assert.ok(peak > 1)
+  })
+})
+
+describe('approachPeak — bounds', () => {
+  test('the cap holds a receding scene back from a zoom no walk-past needs', () => {
+    assert.equal(approachPeak({ ...DESKTOP, cap: 1.5 }), 1.5)
+  })
+
+  test('a box that has not been laid out yet stays at its hung size', () => {
+    // Measured from a DOM node that may not have a size yet; without this the
+    // first paint would scale the painting by Infinity.
+    assert.equal(approachPeak({ ...DESKTOP, boxWidth: 0, boxHeight: 0 }), 1)
+  })
+})
 
 describe('openingChoreography — progress 0 (top of the scroll, hung and framed)', () => {
   test('the artwork is at its hung, unscaled size', () => {

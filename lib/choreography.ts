@@ -18,6 +18,79 @@ function ramp(p: number, from: number, to: number, a: number, b: number) {
 const clamp01 = (p: number) => Math.min(1, Math.max(0, p))
 
 /**
+ * How far past the viewport's width a painting may grow before its approach
+ * stops reading as a bleed and starts reading as a crop.
+ *
+ * A painting reaches full bleed by *covering* the viewport, and covering takes
+ * the larger of the two ratios — so on any screen taller than the painting's
+ * own 16:9 the width overshoots and some of the artwork is pushed off the
+ * sides. A little of that is the point: a bleed is only a bleed if the canvas
+ * runs past the edges.
+ *
+ * On a phone held upright it is not a little. A 16:9 painting covering a 9:19.5
+ * screen is three and a half times as wide as the screen, and what is left on
+ * it is a vertical strip through the middle of a painting whose whole joke is
+ * spread across its width — the horse and the delegates climbing out of it,
+ * Hero on her tower and Leandros in the water below her. The scene arrives at
+ * its climax and there is nothing to see.
+ *
+ * Past this ratio the approach therefore stops covering and fits the painting
+ * whole across the width instead, leaving wall above and below it. See
+ * `approachPeak`.
+ */
+const coverCropLimit = 1.35
+
+/**
+ * The scale a hung painting has to reach at the peak of its approach, measured
+ * against the viewport it is being approached in — the value every cinematic
+ * scene passes to its choreography as `peak`.
+ *
+ * The measurement is the caller's (only the DOM knows how big the painting was
+ * laid out), the arithmetic is here: it is the same on all three approach
+ * scenes, and it is the one place that decides whether a screen gets a bleed or
+ * a fit (`coverCropLimit`).
+ */
+export function approachPeak({
+  viewportWidth,
+  viewportHeight,
+  boxWidth,
+  boxHeight,
+  below = 0,
+  overshoot = 1,
+  cap = Infinity,
+}: {
+  viewportWidth: number
+  viewportHeight: number
+  /** The painting's laid-out size, before any scaling — its `offsetWidth`/`offsetHeight`. */
+  boxWidth: number
+  boxHeight: number
+  /**
+   * Anything centred together with the painting that sits below it — its
+   * label, where the scene groups the two. The painting's own centre sits
+   * `below / 2` above the viewport centre, so covering the viewport means
+   * covering that much more on the bottom edge too.
+   */
+  below?: number
+  /**
+   * How far past a flush fit to take a covering approach, so full bleed reads
+   * as a bleed. Never applied to a fitted (crop-limited) approach: every pixel
+   * of overshoot there is a pixel of painting pushed off the edge.
+   */
+  overshoot?: number
+  /** An upper bound on the result — see EnteringScene's receding path. */
+  cap?: number
+}): number {
+  if (boxWidth <= 0 || boxHeight <= 0) return 1
+
+  const widthCover = viewportWidth / boxWidth
+  const heightCover = (viewportHeight + below) / boxHeight
+  const cover = Math.max(widthCover, heightCover)
+
+  if (cover > widthCover * coverCropLimit) return Math.min(cap, widthCover)
+  return Math.min(cap, cover * overshoot)
+}
+
+/**
  * Progress at which a single-approach scene's scale ramp reaches its
  * full-bleed peak. Scale holds at peak from here to the end of the track,
  * giving the ink-crossfade transition (see `inkCrossfadeOpacity`) room to
@@ -110,23 +183,24 @@ export const openingInkStart = inkStart
  * The opening scene's transform values at a point in the scroll: a single
  * monotonic ramp from the small hung painting up to full bleed, the museum
  * framing device established before the myth comes alive — see
- * docs/adr/0005-scroll-choreography.md. `cover` is the measured scale the hung
- * painting needs to fill the viewport at rest; `peak` overshoots it slightly
- * so full bleed reads as a bleed rather than a flush fit. Scale reaches peak
- * at `openingPeakProgress`, well before the track ends, so there is a real
+ * docs/adr/0005-scroll-choreography.md. `peak` is the scale the hung painting
+ * has to reach to fill the viewport, measured by the caller through
+ * `approachPeak` — overshooting a flush fit slightly where the screen can be
+ * covered at all, and fitting the painting whole across the width where it
+ * cannot (a phone held upright). Scale reaches peak at `openingPeakProgress`,
+ * well before the track ends, so there is a real
  * hold on the full-bleed frame before the scene hands off to the next one via
  * the ink-crossfade transition (starting at `openingInkStart`) rather than
  * resting.
  */
 export function openingChoreography(
   progress: number,
-  cover: number,
+  peak: number,
   reducedMotion: boolean,
 ): OpeningState {
   if (reducedMotion) return openingRest
 
   const p = clamp01(progress)
-  const peak = cover * 1.06
 
   return {
     scale: ramp(p, 0, openingPeakProgress, 1, peak),

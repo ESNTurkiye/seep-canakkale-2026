@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
-import { closingChoreography } from '@/lib/choreography'
+import { approachPeak, closingChoreography } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import s from './museum.module.css'
@@ -49,9 +49,16 @@ export function ClosingScene({
       const el = boxRef.current
       if (!el || !el.offsetWidth || !el.offsetHeight) return
       const below = el.parentElement ? el.parentElement.offsetHeight - el.offsetHeight : 0
-      const widthCover = window.innerWidth / el.offsetWidth
-      const heightCover = (window.innerHeight + below) / el.offsetHeight
-      setPeak(Math.max(widthCover, heightCover) * 1.06)
+      setPeak(
+        approachPeak({
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          boxWidth: el.offsetWidth,
+          boxHeight: el.offsetHeight,
+          below,
+          overshoot: 1.06,
+        }),
+      )
     }
     measure()
     window.addEventListener('resize', measure)

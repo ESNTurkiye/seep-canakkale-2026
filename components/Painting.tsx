@@ -4,6 +4,7 @@ import type { Ref } from 'react'
 import type { MotionValue } from 'motion/react'
 import { motion } from 'motion/react'
 import type { Artwork as ArtworkType } from '@/content/scenes'
+import { FRAME_WIDTH_PX } from '@/lib/choreography'
 import { realPhotoSrc } from '@/lib/realPhoto'
 import { Artwork } from './Artwork'
 import s from './museum.module.css'
@@ -90,14 +91,11 @@ export function Painting(props: PaintingProps) {
       props
     return (
       <>
-        <motion.div
-          ref={boxRef}
-          className={s.painting}
-          // Same resting size as every other hung painting on the site (see
-          // .enteringPainting) — scale 1 now *is* the hung, resting frame,
-          // not an intermediate size shrunk further by a separate multiplier.
-          style={{ width: 'min(52vw, calc(52svh * 16 / 9))', scale }}
-        >
+        {/* Sized by --rest-width like every other hung painting on the site
+            (see .painting / .enteringPainting) — scale 1 *is* the hung,
+            resting frame, not an intermediate size shrunk further by a
+            separate multiplier. */}
+        <motion.div ref={boxRef} className={s.painting} style={{ scale }}>
           <div className={s.paintingInner}>
             <Artwork
               artwork={artwork}
@@ -127,7 +125,15 @@ export function Painting(props: PaintingProps) {
       // once (see openingChoreography's timing), but an entering scene's
       // label travels with the painting instead of pinning to the viewport
       // bottom, where the copy fades in as the frame fades out (issue #16).
-      <div className={s.enteringGroup}>
+      //
+      // The label sits under a frame that hangs outside the painting, so the
+      // gap between them has to clear it; the frame's resting width is
+      // animated from here rather than declared in CSS, so CSS is told what
+      // it settles at. See the data-frames block in museum.module.css.
+      <div
+        className={s.enteringGroup}
+        style={{ ['--resting-frame-width' as string]: `${FRAME_WIDTH_PX}px` }}
+      >
         <motion.div ref={boxRef} className={s.enteringPainting} style={{ scale }}>
           <div className={s.paintingInner}>
             <Artwork

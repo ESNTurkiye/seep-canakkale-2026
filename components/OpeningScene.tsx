@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
-import { openingChoreography, openingInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
+import { approachPeak, openingChoreography, openingInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -31,21 +31,31 @@ export function OpeningScene({
   const trackCollapsed = useResolvedReducedMotion()
 
   /**
-   * How far the hung painting must be scaled up to fill the viewport. Measured
-   * rather than assumed, because it differs wildly between a desktop 16:9 and a
-   * phone held upright.
+   * How far the hung painting must be scaled up to fill the viewport.
+   * Measured rather than assumed, because it differs wildly between a desktop
+   * 16:9 and a phone held upright — and on the phone `approachPeak` fits the
+   * painting whole across the width rather than covering the screen with a
+   * strip of it. The opening's label is positioned against the viewport
+   * rather than grouped under the painting (see Painting's 'opening'
+   * variant), so there is nothing centred below the box to allow for.
    */
-  const [cover, setCover] = useState(1.6)
-  const coverRef = useRef(cover)
-  coverRef.current = cover
+  const [peak, setPeak] = useState(1.6)
+  const peakRef = useRef(peak)
+  peakRef.current = peak
 
   useEffect(() => {
     const measure = () => {
       const el = boxRef.current
       if (!el || !el.offsetWidth || !el.offsetHeight) return
       // offsetWidth/Height are layout sizes, unaffected by the live transform.
-      setCover(
-        Math.max(window.innerWidth / el.offsetWidth, window.innerHeight / el.offsetHeight),
+      setPeak(
+        approachPeak({
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          boxWidth: el.offsetWidth,
+          boxHeight: el.offsetHeight,
+          overshoot: 1.06,
+        }),
       )
     }
     measure()
@@ -61,7 +71,7 @@ export function OpeningScene({
   // Computed once per frame here, then just field-read below — see the
   // per-frame cost note on EnteringScene.
   const state = useTransform(scrollYProgress, (p) =>
-    openingChoreography(p, coverRef.current, !!reduced),
+    openingChoreography(p, peakRef.current, !!reduced),
   )
   const scale = useTransform(state, (st) => st.scale)
   const wallOpacity = useTransform(state, (st) => st.wallOpacity)

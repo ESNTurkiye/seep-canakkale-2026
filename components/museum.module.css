@@ -40,11 +40,32 @@
   height: 100%;
   display: grid;
   place-items: center;
+  /* The size a cinematic painting hangs at before its approach and settles
+     back to after it. Declared once here and read by every variant below, so
+     "the hung size" is one fact rather than a formula copied per scene. */
+  --rest-width: min(52vw, calc(52svh * 16 / 9));
+}
+
+/* A phone held upright is the one shape this site was not composed for, and
+   both ends of the approach show it. At rest, 52vw is a 203px painting adrift
+   in 844px of wall — a stamp, not a picture. At peak, a 16:9 painting cannot
+   cover a screen that tall without pushing three quarters of its width off the
+   edges, so it no longer covers: `approachPeak` fits it whole across the
+   width instead, and it lands as a plate on the wall with ink above and below
+   it. Which leaves two things to arrange here — the resting painting takes
+   more of the width (but not all of it, or the approach has nowhere to grow
+   to), and the painting sits a little above the middle of the stage, off the
+   corner of the screen where the copy fades in over it. */
+@media (max-aspect-ratio: 3 / 4) {
+  .canvasWrap {
+    --rest-width: 60vw;
+    padding-bottom: 12svh;
+  }
 }
 
 .painting {
   position: relative;
-  width: 100%;
+  width: var(--rest-width);
   max-width: 100%;
   aspect-ratio: 16 / 9;
   transform-origin: center center;
@@ -68,7 +89,7 @@
    fill the viewport as it is approached (see EnteringScene). */
 .enteringPainting {
   position: relative;
-  width: min(52vw, calc(52svh * 16 / 9));
+  width: var(--rest-width);
   max-width: 100%;
   aspect-ratio: 16 / 9;
   transform-origin: center center;
@@ -77,6 +98,14 @@
 .enteringLabel {
   text-align: center;
   white-space: nowrap;
+}
+
+/* A title, its myth line and a venue set on one line each need a wall wider
+   than a phone gives them. Narrow enough, they wrap rather than run off it. */
+@media (max-aspect-ratio: 3 / 4) {
+  .enteringLabel {
+    white-space: normal;
+  }
 }
 
 .paintingInner img,
@@ -498,6 +527,15 @@
    canvas — before it is a gap at all. */
 :global(main[data-frames]) .hung {
   gap: calc(1rem + var(--hung-fw) - var(--frame-lip));
+}
+
+/* The same overhang, the same fix, for a cinematic scene's label — which sits
+   under a frame whose width is animated rather than declared, so the resting
+   width comes in from the choreography that animates it (see Painting's
+   'entering' variant). The gap is sized for the frame at rest; as the approach
+   thins the frame the label is already fading out beneath it. */
+:global(main[data-frames]) .enteringGroup {
+  gap: calc(1.25rem + var(--resting-frame-width, 0px) - var(--frame-lip));
 }
 
 :global(main[data-frames]) .hungFrame::after {
