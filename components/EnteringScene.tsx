@@ -3,7 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
-import { approachPeak, enteringChoreography, enteringInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
+import {
+  approachPeak,
+  enteringChoreography,
+  enteringPeakProgress,
+  enteringInkStart,
+  inkCrossfadeOpacity,
+  handoffLift,
+} from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -170,6 +177,13 @@ export function EnteringScene({
             labelOpacity={labelOpacity}
             videoAvailable={videoAvailable}
             reducedMotion={trackCollapsed}
+            progress={scrollYProgress}
+            // The clip lands on its last frame where the painting lands on
+            // its peak — which is the midpoint of a walk-past and
+            // `enteringPeakProgress` for a scene that holds there instead.
+            // A receding scene then holds the last frame on the way out
+            // rather than running the motion backwards.
+            scrubUntil={recede ? 0.5 : enteringPeakProgress}
           />
         </div>
 

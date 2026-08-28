@@ -160,33 +160,35 @@ If the model cannot deliver true transparency, generate against flat magenta and
 
 Any cinematic scene may carry a moving image instead of a still, gated on file presence — not just the opening (issue #17). See `docs/adr/0006-hero-loop-only-no-scrubbed-video.md`. Most artwork on the site stays still; a scene opts in only once its pair of files actually lands.
 
-Shared rules for every loop, regardless of scene:
+A loop is no longer a loop: since ADR-0008 the clip is played by the scroll, forward, and holds on its last frame. That removes the requirement that cost the most — it no longer has to return to where it began — and replaces it with a different one: the last frame is what the viewer looks at for the whole full-bleed hold, so it has to be a composition worth stopping on.
+
+Shared rules for every clip, regardless of scene:
 
 - Source: the finished still, animated. Do not generate a different composition.
-- 3–4 seconds, **seamless** — the last frame must meet the first. Silent. No camera move: the scroll already moves the frame, and a second movement fights it.
+- 8 seconds, forward. Silent. Motion may genuinely progress — the swimmer may cross, the light may change — because the scroll, not a clock, decides how fast it happens.
+- **No camera move.** The scroll is already scaling the painting up; a push-in underneath that reads as two zooms fighting. This is the rule the models break most often, so check the last frame against the first before accepting a take.
 - Deliver `<base>.mp4` and `<base>.webm` into `public/artwork/`, next to the still under the same base name. The still stays as poster and fallback.
-- If the loop is not seamless, we ship the still. A visible jump is worse than no motion.
 
 ### Producing a loop in Google AI Studio
 
-Use **Veo 3.1**, in the same AI Studio project. Seamlessness is the hard part — a freely generated clip almost never lands back on its opening frame, and a loop that does not is not shipped. Veo 3.1 accepts a first frame *and* a last frame, so hand it the same file twice:
+Use **Veo 3.1**, in the same AI Studio project.
 
 - **First frame**: the finished still, e.g. `public/artwork/opening-trojan-horse.jpg`.
-- **Last frame**: that same file again. The clip is then obliged to return to where it began, which is exactly the rule above rather than a lucky take.
-- **Prompt**: only what moves, one sentence, taken from the per-scene note below. Do not re-describe the painting — the two frames already carry it.
-- **Duration**: 4 seconds.
+- **Last frame**: leave it empty. Veo 3.1 accepts one, and anchoring the clip to the still at both ends was how the seamless loop was forced before ADR-0008. A scrubbed clip does not need it, and asking for it buys eight seconds in which nothing may happen — anything that happens would have to un-happen before the end.
+- **Prompt**: only what moves, one sentence, taken from the per-scene note below. Do not re-describe the painting — the first frame already carries it.
+- **Duration**: 8 seconds.
 - **Audio**: the site has no sound. Whatever Veo generates is stripped in the encode.
 
-Veo tops out at 1080p, so a loop is 1920 × 1080 against a 2000 × 1116 still. `object-fit: cover` absorbs that; do not upscale the video to match the still.
+Veo tops out at 1080p, against a 2000 × 1116 still. `object-fit: cover` absorbs the difference; do not upscale the video to match the still.
 
-Encode both files from the download:
+Encode both files from the download. Every frame is a keyframe (`-g 1`) because the clip is seeked rather than played — see ADR-0008 — and the resolution comes down to 960 × 540 at 12 fps to pay for that:
 
 ```
-ffmpeg -i <veo>.mp4 -an -c:v libx264 -crf 23 -pix_fmt yuv420p -movflags +faststart public/artwork/<name>.mp4
-ffmpeg -i <veo>.mp4 -an -c:v libvpx-vp9 -crf 34 -b:v 0 public/artwork/<name>.webm
+ffmpeg -i <veo>.mp4 -an -vf "scale=960:-2,fps=12" -c:v libx264 -crf 26 -g 1 -pix_fmt yuv420p -movflags +faststart public/artwork/<name>.mp4
+ffmpeg -i public/artwork/<name>.mp4 -an -c:v libvpx-vp9 -crf 45 -b:v 0 -g 1 -row-mt 1 public/artwork/<name>.webm
 ```
 
-Then watch the join, several times round, before committing. If the last frame does not truly meet the first, the still ships instead.
+Then scroll the scene, slowly and in both directions, before committing — on a phone as well as a desktop. Stutter under a finger is the failure this costs the most to avoid, and it is the condition ADR-0008 rests on.
 
 ### The opening — `opening-trojan-horse`
 

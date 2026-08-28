@@ -52,6 +52,13 @@ type PaintingProps =
       labelOpacity: MotionValue<number>
       /** Whether the opening's animated loop has landed. See ADR-0006. */
       videoAvailable: boolean
+      /**
+       * The scene's scroll progress, handed to the loop so it is played by
+       * the scroll rather than by the clock — see `SceneVideo`.
+       */
+      progress: MotionValue<number>
+      /** Progress at which that clip reaches its last frame. */
+      scrubUntil: number
       /** Resolved (hydration-safe) reduced-motion preference. See ADR-0006. */
       reducedMotion: boolean
     }
@@ -75,6 +82,14 @@ type PaintingProps =
       videoAvailable: boolean
       /** Resolved (hydration-safe) reduced-motion preference. See ADR-0006. */
       reducedMotion: boolean
+      /**
+       * The scene's scroll progress, where the scene plays its loop by the
+       * scroll rather than by the clock — see `SceneVideo`. Optional: the
+       * closing scene renders through this variant too and has no clip.
+       */
+      progress?: MotionValue<number>
+      /** Progress at which that clip reaches its last frame. */
+      scrubUntil?: number
     }
 
 /**
@@ -87,8 +102,17 @@ export function Painting(props: PaintingProps) {
   const { artwork, available } = props
 
   if (props.variant === 'opening') {
-    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity, videoAvailable, reducedMotion } =
-      props
+    const {
+      boxRef,
+      scale,
+      frameOpacity,
+      frameWidth,
+      labelOpacity,
+      videoAvailable,
+      reducedMotion,
+      progress,
+      scrubUntil,
+    } = props
     return (
       <>
         {/* Sized by --rest-width like every other hung painting on the site
@@ -102,6 +126,8 @@ export function Painting(props: PaintingProps) {
               available={available}
               video={videoAvailable}
               reducedMotion={reducedMotion}
+              progress={progress}
+              scrubUntil={scrubUntil}
             />
           </div>
           <motion.div
@@ -117,8 +143,17 @@ export function Painting(props: PaintingProps) {
   }
 
   if (props.variant === 'entering') {
-    const { boxRef, scale, frameOpacity, frameWidth, labelOpacity, videoAvailable, reducedMotion } =
-      props
+    const {
+      boxRef,
+      scale,
+      frameOpacity,
+      frameWidth,
+      labelOpacity,
+      videoAvailable,
+      reducedMotion,
+      progress,
+      scrubUntil,
+    } = props
     return (
       // Grouped with the label as one unit, rather than the opening's
       // separately overlaid label: the opening never shows copy and label at
@@ -141,6 +176,8 @@ export function Painting(props: PaintingProps) {
               available={available}
               video={videoAvailable}
               reducedMotion={reducedMotion}
+              progress={progress}
+              scrubUntil={scrubUntil}
             />
           </div>
           <motion.div

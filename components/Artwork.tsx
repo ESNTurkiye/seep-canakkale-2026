@@ -1,5 +1,7 @@
+import type { MotionValue } from 'motion/react'
 import type { Artwork as ArtworkType } from '@/content/scenes'
 import { videoBase } from '@/lib/videoBase'
+import { SceneVideo } from './SceneVideo'
 import s from './museum.module.css'
 
 /**
@@ -14,17 +16,28 @@ import s from './museum.module.css'
  * it; a missing artwork renders the placeholder regardless of `video`. With
  * no video files present, or under reduced motion, this renders the exact
  * `<img>` it always has.
+ *
+ * Passing `progress` moves that loop from the clock to the scroll — the
+ * painting advances as the viewer advances instead of cycling on its own.
+ * See `SceneVideo`, which carries what that costs. A scene that does not
+ * pass one keeps the autoplaying loop.
  */
 export function Artwork({
   artwork,
   available,
   video = false,
   reducedMotion = false,
+  progress,
+  scrubUntil = 1,
 }: {
   artwork: ArtworkType
   available: boolean
   video?: boolean
   reducedMotion?: boolean
+  /** The scene's own scroll progress. Present means: scrub, do not autoplay. */
+  progress?: MotionValue<number>
+  /** Progress at which the clip reaches its last frame — see `SceneVideo`. */
+  scrubUntil?: number
 }) {
   if (!available) {
     return (
@@ -34,6 +47,18 @@ export function Artwork({
           <p className={s.placeholderTitle}>{artwork.title}</p>
         </div>
       </div>
+    )
+  }
+
+  if (video && !reducedMotion && progress) {
+    return (
+      <SceneVideo
+        base={videoBase(artwork.src)}
+        poster={artwork.src}
+        alt={artwork.alt}
+        progress={progress}
+        until={scrubUntil}
+      />
     )
   }
 

@@ -3,12 +3,11 @@
  *
  *   node scripts/generate-loop.mjs <name> [--quality]
  *
- * The hard requirement in docs/adr/0006 is that the last frame meets the
- * first — a loop that visibly jumps is not shipped, and a freely generated
- * clip almost never lands back where it started. Veo 3.1 takes a first frame
- * and a last frame, so the finished still is handed in as both. The clip is
- * then obliged to return to its opening, which is the rule rather than a
- * lucky take.
+ * The clip runs forward and is played by the scroll (ADR-0008), so it does
+ * not have to return to where it began. Only the first frame is anchored, to
+ * the finished still: the loop-forcing trick of handing the same file in as
+ * the last frame too is what bought eight seconds in which nothing could
+ * happen, since anything that happened had to un-happen before the end.
  *
  * Defaults to Veo 3.1 Fast, which is where seam iteration belongs: at roughly
  * a quarter the per-second cost, and the seam either closes or it does not.
@@ -73,9 +72,9 @@ const base = `https://generativelanguage.googleapis.com/v1beta/models/${model}`
 console.log(`${model}  ${name}\n  moves: ${moves}`)
 
 const started = await post(`${base}:predictLongRunning`, {
-  instances: [{ prompt: moves, image: frame, lastFrame: frame }],
+  instances: [{ prompt: moves, image: frame }],
   parameters: {
-    durationSeconds: 4,
+    durationSeconds: 8,
     aspectRatio: '16:9',
     resolution: '1080p',
     sampleCount: 1,

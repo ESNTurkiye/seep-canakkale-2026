@@ -4,7 +4,14 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
-import { approachPeak, openingChoreography, openingInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
+import {
+  approachPeak,
+  openingChoreography,
+  openingPeakProgress,
+  openingInkStart,
+  inkCrossfadeOpacity,
+  handoffLift,
+} from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -144,6 +151,11 @@ export function OpeningScene({
             labelOpacity={labelOpacity}
             videoAvailable={videoAvailable}
             reducedMotion={trackCollapsed}
+            progress={scrollYProgress}
+            // The clip lands on its last frame exactly where the painting
+            // lands on full bleed, so the motion finishes with the approach
+            // rather than somewhere inside the hold after it.
+            scrubUntil={openingPeakProgress}
           />
         </div>
 
