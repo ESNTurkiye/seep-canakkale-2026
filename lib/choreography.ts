@@ -31,7 +31,25 @@ const clamp01 = (p: number) => Math.min(1, Math.max(0, p))
 const peakProgress = 0.8
 
 /** Progress at which a single-approach scene starts its ink-crossfade fade to the next scene. */
-const inkStart = 0.88
+const inkStart = 0.86
+
+/**
+ * Progress at which a single-approach scene's stage lifts off the next wall.
+ *
+ * The handoff is two beats, not one. First the ink crossfade covers the
+ * painting (`inkStart` to here). Then the stage — by now a plain sheet of
+ * --ink — fades out (`handoffLift`), and what is behind it is the next scene,
+ * already composed and in position: the scene's track overlaps its successor
+ * by exactly one viewport (the sticky stage's own height), so the stage's
+ * final resting slot *is* where the next wall sits.
+ *
+ * This is what stops the handoff costing a screen of scrolling through
+ * nothing. Without the overlap, a sticky 100svh stage has to be scrolled off
+ * before the next section can arrive, and since both are --ink the viewer
+ * spends that screen looking at unchanging black. With it, the transition
+ * ends on the next wall rather than somewhere above it.
+ */
+const handoffStart = 0.94
 
 /**
  * The shared frame/copy/label crossfade timing for a single approach to
@@ -332,7 +350,28 @@ export function lightMovement(progress: number, reducedMotion: boolean): LightMo
  */
 export function inkCrossfadeOpacity(progress: number, start: number, reducedMotion: boolean): number {
   if (reducedMotion) return 0
-  return ramp(clamp01(progress), start, 1, 0, 1)
+  // Opaque by `handoffStart`, not at the end of the track: the stage lifts
+  // from there (see `handoffLift`), and it has to be a solid sheet of ink
+  // before it does, or the painting shows through the lift.
+  return ramp(clamp01(progress), start, handoffStart, 0, 1)
+}
+
+/** Progress at which a single-approach scene's stage begins to lift — see `handoffStart`. */
+export const handoffLiftStart = handoffStart
+
+/**
+ * Opacity of a single-approach scene's whole stage as it hands off: 1 until
+ * `handoffLiftStart`, then down to 0 at the end of the track, uncovering the
+ * next scene in place. The counterpart to `inkCrossfadeOpacity` — that one
+ * fades the painting *into* ink, this one lifts the ink *off* the next wall.
+ *
+ * Reduced motion holds it at 1: scenes are stacked with no overlap and no
+ * scroll-driven animation there, so a stage that faded out would erase itself
+ * off a wall that isn't behind it. See ADR-0005.
+ */
+export function handoffLift(progress: number, reducedMotion: boolean): number {
+  if (reducedMotion) return 1
+  return ramp(clamp01(progress), handoffLiftStart, 1, 1, 0)
 }
 
 /**

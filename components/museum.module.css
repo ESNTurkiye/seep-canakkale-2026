@@ -12,6 +12,11 @@
   display: grid;
   place-items: center;
   background: var(--ink);
+  /* A handing-off track overlaps the section below it by one viewport, so the
+     stage has to paint over that section until it lifts. Being sticky is not
+     enough on its own: a positioned descendant of the next section (the strait
+     chart) would otherwise paint above it, being later in tree order. */
+  z-index: 1;
 }
 
 .wall {

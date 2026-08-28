@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
 import { event } from '@/content/event'
-import { openingChoreography, openingInkStart, inkCrossfadeOpacity } from '@/lib/choreography'
+import { openingChoreography, openingInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -75,6 +75,13 @@ export function OpeningScene({
   const inkOpacity = useTransform(scrollYProgress, (p) =>
     inkCrossfadeOpacity(p, openingInkStart, !!reduced),
   )
+  // The second beat of the handoff: once the ink is solid, the whole stage
+  // fades out to uncover the next wall, which the negative margin below has
+  // already parked exactly behind it. See handoffLift.
+  const stageOpacity = useTransform(scrollYProgress, (p) => handoffLift(p, !!reduced))
+  // An opacity-0 stage still swallows clicks and text selection from the wall
+  // it has just uncovered.
+  const stagePointerEvents = useTransform(stageOpacity, (o: number) => (o < 0.02 ? 'none' : 'auto'))
   // copyOpacity starts at 0 (see openingChoreography) — without this, the CTA
   // link inside stays keyboard-focusable while fully invisible at page load.
   // Also hidden once the ink crossfade has covered it, so the same link
@@ -89,16 +96,30 @@ export function OpeningScene({
     <section
       ref={trackRef}
       className={s.track}
-      // EnteringScene's 320svh is a full approach-and-recede round trip, i.e.
-      // ~160svh one-way; the opening only grows one-way but needs a bit more
-      // for the copy fade-in to land after full bleed, plus a real hold at
-      // peak (openingPeakProgress) before the ink crossfade (openingInkStart)
-      // hands off to the next scene, hence 260svh. Estimate — remeasure by
-      // scrolling once real content is in place.
-      style={{ height: trackCollapsed ? '100svh' : '260svh' }}
+      // Remeasured against real content, as the earlier 260svh estimate asked
+      // to be. A sticky 100svh stage means the track's scrollable range is
+      // `height - 100svh`, so 220svh buys 120svh of choreography: growth to
+      // openingPeakProgress, a hold at full bleed, the ink crossfade from
+      // openingInkStart, and the stage's lift from handoffLiftStart.
+      //
+      // The negative margin is what makes the last of those land on the next
+      // scene instead of above it. It pulls the following section up by the
+      // stage's own height, so the stage's final resting slot and the next
+      // wall occupy the same 100svh of document: the stage (positioned, so it
+      // paints over the section) hides that wall until it lifts, and when it
+      // does the wall is already composed and centred rather than a screen's
+      // scroll below. Reduced motion collapses the track and drops the
+      // overlap — scenes simply stack there.
+      style={{
+        height: trackCollapsed ? '100svh' : '220svh',
+        marginBottom: trackCollapsed ? undefined : '-100svh',
+      }}
       aria-label={scene.headline}
     >
-      <div className={s.stage}>
+      <motion.div
+        className={s.stage}
+        style={{ opacity: stageOpacity, pointerEvents: stagePointerEvents }}
+      >
         <motion.div className={s.wall} style={{ opacity: wallOpacity }} />
 
         <div className={s.canvasWrap}>
@@ -135,7 +156,7 @@ export function OpeningScene({
         </motion.div>
 
         <InkCrossfade progress={scrollYProgress} start={openingInkStart} reducedMotion={!!reduced} />
-      </div>
+      </motion.div>
     </section>
   )
 }

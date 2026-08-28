@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
-import { enteringChoreography, enteringInkStart, inkCrossfadeOpacity } from '@/lib/choreography'
+import { enteringChoreography, enteringInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -112,6 +112,15 @@ export function EnteringScene({
   const copyVisibility = useTransform([copyOpacity, inkOpacity], ([co, io]: number[]) =>
     co > 0.02 && io < 0.98 ? 'visible' : 'hidden',
   )
+  // The handoff's second beat, on the non-receding path only — the same shape
+  // OpeningScene uses, and for the same reason: the stage lifts off the next
+  // wall rather than being scrolled off it. Computed unconditionally to keep
+  // hook order stable; a receding scene never overlaps its successor, so
+  // pinning the value at 1 there leaves it a plain opaque stage.
+  const stageOpacity = useTransform(scrollYProgress, (p) =>
+    handoffLift(p, !!reduced || recede),
+  )
+  const stagePointerEvents = useTransform(stageOpacity, (o: number) => (o < 0.02 ? 'none' : 'auto'))
 
   const artwork = scene.artworks[0]
   const available = availability[artwork.src] ?? false
@@ -121,15 +130,22 @@ export function EnteringScene({
       ref={trackRef}
       className={s.track}
       // A full approach-and-recede round trip costs ~320svh (see ADR-0005).
-      // A non-receding scene only makes the approach, so it borrows the
-      // opening's one-way estimate instead (260svh: roughly half that round
-      // trip plus a tail for the copy to fade in and hold before the ink
-      // crossfade) — an estimate to be remeasured against real content, same
-      // caveat as OpeningScene's track height.
-      style={{ height: trackCollapsed ? '100svh' : recede ? '320svh' : '260svh' }}
+      // A non-receding scene only makes the approach and then hands off, so it
+      // takes the opening's remeasured 220svh and its one-viewport overlap
+      // with the scene below — the handoff is the same two beats there, and
+      // the two are deliberately kept identical (see handoffStart). A
+      // receding scene keeps its full round trip and never overlaps: it hands
+      // off to nothing, it just walks past.
+      style={{
+        height: trackCollapsed ? '100svh' : recede ? '320svh' : '220svh',
+        marginBottom: trackCollapsed || recede ? undefined : '-100svh',
+      }}
       aria-label={scene.headline}
     >
-      <div className={s.stage}>
+      <motion.div
+        className={s.stage}
+        style={{ opacity: stageOpacity, pointerEvents: stagePointerEvents }}
+      >
         <motion.div className={s.wall} style={{ opacity: wallOpacity }} />
 
         <div className={s.canvasWrap}>
@@ -161,7 +177,7 @@ export function EnteringScene({
         {!recede && (
           <InkCrossfade progress={scrollYProgress} start={enteringInkStart} reducedMotion={!!reduced} />
         )}
-      </div>
+      </motion.div>
     </section>
   )
 }
