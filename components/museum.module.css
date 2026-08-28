@@ -220,6 +220,18 @@
   color: var(--dust);
 }
 
+/* The plain fact under the poetry. Set in the accent the site already uses
+   wherever it names what something is — the eyebrows, a committee member's
+   role — so it reads as the practical line rather than more label. */
+.labelVenue {
+  margin-top: 0.5em;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--seep);
+}
+
 /* Typographic scene — the rest between walls. */
 .statement {
   min-height: 100svh;

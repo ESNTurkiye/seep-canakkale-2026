@@ -8,12 +8,19 @@ import { realPhotoSrc } from '@/lib/realPhoto'
 import { Artwork } from './Artwork'
 import s from './museum.module.css'
 
-/** Title and myth from the artwork itself — never a scene-specific label. */
+/** Title, myth and — where the painting is of somewhere real — the room's own
+ *  name, all from the artwork itself; never a scene-specific label.
+ *
+ *  The venue line is rendered here rather than only in the hung variant, so
+ *  the data decides where it appears instead of a second rule that could drift
+ *  from `Artwork.venue`. Today only hung paintings carry one: the cinematic
+ *  scenes are places in the myth, not rooms anyone books. */
 function LabelText({ artwork }: { artwork: ArtworkType }) {
   return (
     <>
       <p className={s.labelTitle}>{artwork.title}</p>
       <p className={s.labelMyth}>{artwork.myth}</p>
+      {artwork.venue ? <p className={s.labelVenue}>{artwork.venue}</p> : null}
     </>
   )
 }

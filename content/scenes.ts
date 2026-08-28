@@ -12,6 +12,15 @@ export type Artwork = {
   title: string
   /** The myth being borrowed. Shown on the label beneath the title. */
   myth: string
+  /**
+   * The real place, named plainly at the foot of the label. The title and the
+   * myth say what the painting *is*; a delegate reading the wall also wants to
+   * know which room they are being shown. Set it on any painting of somewhere
+   * that exists — which is the same set that reveals a photograph as you scroll
+   * past (issue #19) — and leave it off anything else: the coffee break is a
+   * habit, not a room, and the cinematic scenes are places in the myth.
+   */
+  venue?: string
   alt: string
 }
 
@@ -115,24 +124,28 @@ export const scenes: Scene[] = [
         src: '/artwork/venues-ariadne-thread.jpg',
         title: 'The Thread',
         myth: "after Ariadne's clew",
+        venue: 'Registration',
         alt: 'Ariadne at a colonnaded threshold pressing a ball of crimson thread into an arriving traveller\u2019s hand, a queue waiting behind a retractable-belt barrier.',
       },
       {
         src: '/artwork/venues-homer-recital.jpg',
         title: 'The Recital',
         myth: 'after Homer',
+        venue: 'Opening Hall',
         alt: 'Blind Homer reciting on a marble dais to a seated audience, while a scribe transcribes on a laptop.',
       },
       {
         src: '/artwork/venues-judgement-of-paris.jpg',
         title: 'The Choice',
         myth: 'after the Judgement of Paris',
+        venue: 'Parallel Sessions',
         alt: 'A shepherd holding a golden apple, unable to choose between three goddesses standing before three doorways.',
       },
       {
         src: '/artwork/venues-torch-handover.jpg',
         title: 'The Handover',
         myth: 'after the passing of the flame',
+        venue: 'Closing Hall',
         alt: 'A burning torch passing from one hand to another on a dais before a seated assembly, a chrome microphone stand beside them.',
       },
     ],
@@ -163,12 +176,14 @@ export const scenes: Scene[] = [
         src: '/artwork/evenings-intercultural.jpg',
         title: 'The Table',
         myth: 'after the Sirens',
+        venue: 'Intercultural Night',
         alt: 'A long marble banquet table above the sea at dusk, figures from many lands passing dishes, two sirens singing unheeded from a balustrade.',
       },
       {
         src: '/artwork/evenings-turkish-night.jpg',
         title: 'The Circle',
         myth: 'after the Anatolian round dance',
+        venue: 'Turkish Night',
         alt: 'Figures in classical drapery dancing in a linked circle on a marble terrace at night, a lute player and a tray of tea glasses beside them.',
       },
     ],
@@ -184,12 +199,14 @@ export const scenes: Scene[] = [
         src: '/artwork/stay-xenia.jpg',
         title: 'Xenia',
         myth: 'after the Homeric rite of guest-friendship',
+        venue: 'Temizay Otel',
         alt: 'A host kneeling to wash the feet of an arriving traveller at a colonnaded threshold, a modern rolling suitcase standing beside them.',
       },
       {
         src: '/artwork/stay-kule-beacon.jpg',
         title: 'The Beacon',
         myth: "after Hestia's kept flame",
+        venue: 'Kule Otel',
         alt: "A keeper standing at the top of a stone tower, tending a hearth-brazier that burns as a beacon over the darkening strait, a modern rolling suitcase resting at the tower's foot.",
       },
     ],
