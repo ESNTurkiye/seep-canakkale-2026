@@ -26,7 +26,7 @@ async function newerThan(a, b) {
   return x && y && x.mtimeMs > y.mtimeMs
 }
 
-async function derive({ from, to, width, encode, label }) {
+async function derive({ from, to, width, height, encode, label }) {
   await mkdir(to, { recursive: true })
   const masters = await readdir(from).catch(() => [])
   for (const file of masters.filter((f) => f.endsWith('.png'))) {
@@ -34,8 +34,16 @@ async function derive({ from, to, width, encode, label }) {
     const out = join(to, file.replace(/\.png$/, encode === 'jpeg' ? '.jpg' : '.png'))
     if (!force && (await newerThan(out, src))) continue
 
-    const pipeline = sharp(src).resize({ width })
-    await (encode === 'jpeg' ? pipeline.jpeg({ quality: 92, mozjpeg: true }) : pipeline.png()).toFile(out)
+    // Portraits are cropped to an exact 4:5 rather than merely scaled: the
+    // model returns 4:5 approximately (800×993, not 800×1000), and sixteen
+    // frames hung as one wall show any drift. Palette quantisation is what
+    // keeps a PNG portrait near 450KB instead of 1.8MB — at sixteen of them,
+    // the difference is 22MB of repository and of every visitor's download.
+    const pipeline = height ? sharp(src).resize(width, height, { fit: 'cover' }) : sharp(src).resize({ width })
+    await (encode === 'jpeg'
+      ? pipeline.jpeg({ quality: 92, mozjpeg: true })
+      : pipeline.png({ palette: true, quality: 90, effort: 8 })
+    ).toFile(out)
     const { width: w, height: h } = await sharp(out).metadata()
     const { size } = await stat(out)
     console.log(`${label}  ${out.replace(ROOT, '')}  ${w}×${h}  ${Math.round(size / 1024)} KB`)
@@ -53,6 +61,7 @@ await derive({
   from: join(ROOT, 'assets/artwork-masters/portraits'),
   to: join(ROOT, 'public/portraits'),
   width: 800,
+  height: 1000,
   encode: 'png',
   label: 'portrait',
 })

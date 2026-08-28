@@ -73,7 +73,7 @@ async function readAsInlineImage(path) {
   return { mimeType: 'image/jpeg', data: (await readFile(converted)).toString('base64') }
 }
 
-async function generate({ prompt, aspectRatio, imageSize, reference }) {
+async function generate({ prompt, aspectRatio, imageSize, reference, attempt = 1 }) {
   const parts = [{ text: prompt }]
   if (reference) parts.unshift({ inlineData: reference })
 
@@ -94,6 +94,17 @@ async function generate({ prompt, aspectRatio, imageSize, reference }) {
   )
 
   const body = await res.json()
+
+  // 429 and 503 are the model being busy, not the request being wrong. A run
+  // of sixteen portraits hits this reliably, and a bare failure there wastes
+  // the whole batch rather than one image. Retry with a widening gap; leave
+  // every other status to fail loudly and immediately.
+  if ((res.status === 429 || res.status === 503) && attempt < 5) {
+    const wait = 15_000 * attempt
+    console.error(`  ${res.status} — retrying in ${wait / 1000}s (attempt ${attempt + 1}/5)`)
+    await new Promise((r) => setTimeout(r, wait))
+    return generate({ prompt, aspectRatio, imageSize, reference, attempt: attempt + 1 })
+  }
   if (!res.ok) throw new Error(`${res.status}: ${body.error?.message ?? JSON.stringify(body)}`)
 
   const candidate = body.candidates?.[0]
