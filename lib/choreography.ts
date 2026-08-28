@@ -46,12 +46,13 @@ const inkStart = 0.88
  * It is a visual constant, not a free parameter. The gilt frame is a 9-slice
  * asset (issue #12) whose corners carry acanthus carving, and border-image
  * squeezes each corner into exactly this many pixels. At 18 the carving
- * collapsed into a dark smudge while the straight edges still read fine —
+ * collapsed into a dark smudge while the straight edges still read fine, and
+ * at 34 it was legible but still read thin against the painting —
  * the corners have to be given room or the asset is worse than the gradient
  * it replaced. Raising this is what buys that room; the ramps below animate
  * to and from it, and the tests assert against it rather than a literal.
  */
-export const FRAME_WIDTH_PX = 34
+export const FRAME_WIDTH_PX = 44
 
 function approachCrossfade(p: number) {
   return {

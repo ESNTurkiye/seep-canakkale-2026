@@ -296,7 +296,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: clamp(12px, 1.7vw, 26px) solid var(--frame);
+  border: clamp(15px, 2.2vw, 34px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -340,7 +340,7 @@
 .portraitFrame {
   position: relative;
   aspect-ratio: 4 / 5;
-  border: clamp(7px, 0.8vw, 12px) solid var(--frame);
+  border: clamp(9px, 1vw, 15px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 40%, #7a5f30 75%, var(--frame-lit)) 1;
   box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
   overflow: hidden;
