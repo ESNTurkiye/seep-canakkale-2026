@@ -52,3 +52,18 @@ export async function loadPrompts() {
 
   return { style, portraitTemplate, scenes }
 }
+
+/**
+ * The loop prompts, from the "Animated loops" section. A loop prompt is only
+ * what moves: the still is handed to Veo as both first and last frame, so it
+ * already carries the composition, and re-describing the painting fights it.
+ */
+export async function loadLoopPrompts() {
+  const doc = await readFile(DOC, 'utf8')
+  const loops = new Map()
+  for (const m of doc.matchAll(/^### .+ — `([\w-]+)`$/gm)) {
+    const moves = doc.slice(m.index).match(/^- What moves: (.+)$/m)
+    if (moves) loops.set(m[1], moves[1].trim())
+  }
+  return loops
+}
