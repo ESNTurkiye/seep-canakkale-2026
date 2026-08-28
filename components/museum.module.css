@@ -393,6 +393,13 @@
 .portrait {
   display: grid;
   gap: 0.6rem;
+  /* Each portrait is stretched to the tallest in its row, and the default
+     `align-content` shares that slack out between the frame row and the text
+     row. So a one-line role left the frame row 12px taller than a two-line
+     one did, and the names sat at different heights along the wall. The slack
+     collects under the text instead: sixteen frames, sixteen names on one
+     line, whatever the roles beneath them run to. */
+  align-content: start;
 }
 
 .portraitFrame {
