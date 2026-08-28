@@ -7,7 +7,24 @@
 .stage {
   position: sticky;
   top: 0;
-  height: 100svh;
+  /* Two heights, on purpose.
+     
+     `svh` is the viewport with the browser's chrome showing, and a phone
+     retracts that chrome as you scroll: the screen gets taller, a stage
+     measured in `svh` does not, and the strip it stops covering is where the
+     next scene shows through — the strait chart creeping up from under the
+     opening while it is still playing.
+     
+     So the box is `lvh`, the tallest the viewport can become, and the part of
+     it below `svh` is padding rather than content. The stage paints the whole
+     screen in every chrome state, while everything centred inside it stays
+     centred in the same `svh` it always was. On a desktop the two are equal
+     and this is all a no-op. No fallback height is needed: the two units
+     shipped in the same browser releases, so nothing understands one and not
+     the other. */
+  --viewport-gap: calc(100lvh - 100svh);
+  height: 100lvh;
+  padding-bottom: var(--viewport-gap);
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -189,7 +206,12 @@
    headline bottom-left, supporting copy and action bottom-right. */
 .copy {
   position: absolute;
-  inset: 0;
+  /* Held off the stage's chrome padding: the copy is anchored to the bottom
+     of the screen, and the bottom of the *box* is behind a browser toolbar
+     half the time. Everything else in the stage covers the padding
+     deliberately (the wall, the ink crossfade); this is the one layer that
+     must not. */
+  inset: 0 0 var(--viewport-gap, 0) 0;
   padding: var(--gutter);
   display: grid;
   grid-template-rows: auto 1fr auto;
