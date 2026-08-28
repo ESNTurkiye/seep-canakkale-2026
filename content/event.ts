@@ -14,8 +14,20 @@ export const event = {
   domain: 'seep.esnturkey.org',
 
   /**
-   * No application route exists yet. While this is null the call to action
-   * renders as "Applications open soon" instead of a dead link.
+   * Delegates apply through the event's page on the ESN events platform.
+   * While this is null the call to action renders as "Applications open
+   * soon" instead of a dead link.
    */
-  applicationUrl: null as string | null,
+  applicationUrl: 'https://events.esn.org/event/seep-çanakkale-2026' as string | null,
+
+  /**
+   * When that page accepts applications: Thursday 27 August – Sunday 6
+   * September 2026. Verified against a calendar, like the event's own dates.
+   * The labels are what the closing scene says out loud — kept here with the
+   * dates they render so the two cannot drift apart.
+   */
+  applicationStartDate: '2026-08-27',
+  applicationEndDate: '2026-09-06',
+  applicationWindowLabel: '27 August – 6 September 2026',
+  applicationCloseLabel: '6 September',
 } as const

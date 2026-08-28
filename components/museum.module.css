@@ -7,11 +7,33 @@
 .stage {
   position: sticky;
   top: 0;
-  height: 100svh;
+  /* Two heights, on purpose.
+     
+     `svh` is the viewport with the browser's chrome showing, and a phone
+     retracts that chrome as you scroll: the screen gets taller, a stage
+     measured in `svh` does not, and the strip it stops covering is where the
+     next scene shows through — the strait chart creeping up from under the
+     opening while it is still playing.
+     
+     So the box is `lvh`, the tallest the viewport can become, and the part of
+     it below `svh` is padding rather than content. The stage paints the whole
+     screen in every chrome state, while everything centred inside it stays
+     centred in the same `svh` it always was. On a desktop the two are equal
+     and this is all a no-op. No fallback height is needed: the two units
+     shipped in the same browser releases, so nothing understands one and not
+     the other. */
+  --viewport-gap: calc(100lvh - 100svh);
+  height: 100lvh;
+  padding-bottom: var(--viewport-gap);
   overflow: hidden;
   display: grid;
   place-items: center;
   background: var(--ink);
+  /* A handing-off track overlaps the section below it by one viewport, so the
+     stage has to paint over that section until it lifts. Being sticky is not
+     enough on its own: a positioned descendant of the next section (the strait
+     chart) would otherwise paint above it, being later in tree order. */
+  z-index: 1;
 }
 
 .wall {
@@ -21,17 +43,69 @@
     radial-gradient(120% 90% at 50% 0%, var(--wall-lit) 0%, var(--wall) 55%, var(--ink) 100%);
 }
 
+/* Carries the viewer between scenes — see InkCrossfade.tsx and issue #15. */
+.inkCrossfade {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  pointer-events: none;
+}
+
 .canvasWrap {
   position: relative;
   width: 100%;
   height: 100%;
   display: grid;
   place-items: center;
+  /* The size a cinematic painting hangs at before its approach and settles
+     back to after it. Declared once here and read by every variant below, so
+     "the hung size" is one fact rather than a formula copied per scene. */
+  --rest-width: min(52vw, calc(52svh * 16 / 9));
+}
+
+/* A phone held upright is the one shape this site was not composed for, and
+   both ends of the approach show it. At rest, 52vw is a 203px painting adrift
+   in 844px of wall — a stamp, not a picture. At peak, a 16:9 painting cannot
+   cover a screen that tall without pushing three quarters of its width off the
+   edges, so it no longer covers: `approachPeak` fits it whole across the
+   width instead, and it lands as a plate on the wall with ink above and below
+   it. Which leaves two things to arrange here — the resting painting takes
+   more of the width (but not all of it, or the approach has nowhere to grow
+   to), and the painting sits a little above the middle of the stage, off the
+   corner of the screen where the copy fades in over it. */
+@media (max-aspect-ratio: 3 / 4) {
+  .canvasWrap {
+    --rest-width: 60vw;
+    padding-bottom: 12svh;
+  }
+}
+
+/* The closing scene shows, all at once and all of the time, what every other
+   scene shows in turns: the painting, its label, a headline, a paragraph and
+   the site's only button (issue #18 — its copy is not gated behind reaching a
+   peak, because it has no approach to hide it during). At the standard resting
+   size that does not fit a laptop screen: the frame's bottom edge lands in the
+   band the dates and the button need, and the label ends up wedged between the
+   two.
+
+   So this one scene rests smaller and sits higher, which is the whole
+   adjustment — the painting still reads as the same object hung on the same
+   wall, and it is still the largest thing on the screen. The resting size is
+   held back only where there is width to give up for it; a phone already
+   hangs its paintings at 60vw and cannot afford to. */
+.canvasWrap.closingCanvas {
+  padding-bottom: clamp(4rem, 12svh, 10rem);
+}
+
+@media (min-aspect-ratio: 3 / 4) {
+  .canvasWrap.closingCanvas {
+    --rest-width: min(46vw, calc(44svh * 16 / 9));
+  }
 }
 
 .painting {
   position: relative;
-  width: 100%;
+  width: var(--rest-width);
   max-width: 100%;
   aspect-ratio: 16 / 9;
   transform-origin: center center;
@@ -55,7 +129,7 @@
    fill the viewport as it is approached (see EnteringScene). */
 .enteringPainting {
   position: relative;
-  width: min(52vw, calc(52svh * 16 / 9));
+  width: var(--rest-width);
   max-width: 100%;
   aspect-ratio: 16 / 9;
   transform-origin: center center;
@@ -66,6 +140,14 @@
   white-space: nowrap;
 }
 
+/* A title, its myth line and a venue set on one line each need a wall wider
+   than a phone gives them. Narrow enough, they wrap rather than run off it. */
+@media (max-aspect-ratio: 3 / 4) {
+  .enteringLabel {
+    white-space: normal;
+  }
+}
+
 .paintingInner img,
 .paintingInner video {
   width: 100%;
@@ -74,13 +156,14 @@
   display: block;
 }
 
-/* The gilt frame, revealed as the artwork recedes. Opening overrides
-   border-width inline as it animates in; entering scenes use this default. */
+/* The gilt frame, revealed as the artwork recedes. Both opening and entering
+   scenes override border-width inline as they animate; this is just the
+   base declaration the inline override composes onto. */
 .frame {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border-width: 18px;
+  border-width: var(--fw, 18px);
   border-style: solid;
   border-color: var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
@@ -123,7 +206,12 @@
    headline bottom-left, supporting copy and action bottom-right. */
 .copy {
   position: absolute;
-  inset: 0;
+  /* Held off the stage's chrome padding: the copy is anchored to the bottom
+     of the screen, and the bottom of the *box* is behind a browser toolbar
+     half the time. Everything else in the stage covers the padding
+     deliberately (the wall, the ink crossfade); this is the one layer that
+     must not. */
+  inset: 0 0 var(--viewport-gap, 0) 0;
   padding: var(--gutter);
   display: grid;
   grid-template-rows: auto 1fr auto;
@@ -154,7 +242,9 @@
 .side {
   max-width: var(--measure);
   display: grid;
-  gap: 1.25rem;
+  /* Enough that the button reads as a thing to press rather than as the last
+     line of the paragraph above it. */
+  gap: 1.75rem;
   justify-items: start;
   text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
 }
@@ -206,9 +296,21 @@
   color: var(--dust);
 }
 
+/* The plain fact under the poetry. Set in the accent the site already uses
+   wherever it names what something is — the eyebrows, a committee member's
+   role — so it reads as the practical line rather than more label. */
+.labelVenue {
+  margin-top: 0.5em;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--seep);
+}
+
 /* Typographic scene — the rest between walls. */
 .statement {
-  min-height: 92svh;
+  min-height: 100svh;
   display: grid;
   align-content: center;
   gap: 2rem;
@@ -217,19 +319,49 @@
 }
 
 .statementInner {
-  max-width: 22ch;
   display: grid;
   gap: 1.5rem;
 }
 
+/* Wide enough to be a wall, not a column. The headline carries its own
+   measure in its own (display) face — the previous 22ch cap sat on this
+   wrapper instead, where `ch` resolves against the body face and squeezed a
+   --step-4 headline into eight lines down the left edge of an otherwise empty
+   screen. Body copy moves to a second column so the statement composes across
+   the width, the way the opening's copy does. */
+@media (min-width: 900px) {
+  .statementInner {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    column-gap: clamp(3rem, 7vw, 8rem);
+    align-items: end;
+  }
+  .statementInner > :global(.eyebrow),
+  .statementInner .rule {
+    grid-column: 1 / -1;
+  }
+  .statementHeadline {
+    grid-column: 1;
+  }
+  .statementAside {
+    grid-column: 2;
+  }
+}
+
+.statementAside {
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  align-content: end;
+}
+
 .statementHeadline {
-  font-size: var(--step-3);
-  max-width: 20ch;
+  font-size: var(--step-4);
+  max-width: 18ch;
 }
 
 .statementBody {
   max-width: var(--measure);
   color: var(--dust);
+  font-size: var(--step-1);
 }
 
 .rule {
@@ -244,7 +376,11 @@
   display: grid;
   align-content: center;
   gap: clamp(2rem, 5vw, 4rem);
-  padding: clamp(4rem, 10vh, 9rem) var(--gutter);
+  /* A gallery wall taller than the viewport has no free space left for
+     `align-content: center` to distribute, so this padding is the only thing
+     holding its first line off the top edge. A handing-off scene now uncovers
+     the wall exactly at its top (see handoffLift), which is where that showed. */
+  padding: clamp(5rem, 14vh, 11rem) var(--gutter) clamp(4rem, 10vh, 9rem);
   background: var(--ink);
 }
 
@@ -270,13 +406,20 @@
 }
 
 @media (min-width: 900px) {
-  .hangTwo {
+  /* Two columns whatever the count: two paintings sit side by side, four
+     fall into two rows of two. A wall of hung paintings is a content
+     decision (see `kind: 'wall'`), so the grid must not assume a number. */
+  .hangWall {
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
 }
 
 .hung {
+  /* One declaration for the hung frame's thickness: the border below, the
+     9-slice overhang in the frames block, and the label gap that has to clear
+     that overhang all read it, so they cannot drift apart. */
+  --hung-fw: clamp(15px, 2.2vw, 34px);
   width: 100%;
   display: grid;
   gap: 1rem;
@@ -287,7 +430,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: clamp(8px, 1.1vw, 16px) solid var(--frame);
+  border: var(--hung-fw) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -300,6 +443,16 @@
   display: block;
 }
 
+/* The real-photo crossfade layer (issue #19) — sized/fit by `.hungFrame img`
+   above like every other image in the frame; this only stacks it over the
+   painting and keeps it hidden until scroll reveals it. */
+.hungRealPhoto {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .hungLabel {
   text-align: center;
   display: grid;
@@ -308,6 +461,15 @@
 
 /* The portrait wall — sixteen of them. */
 .portraitWall {
+  /* It is a list, semantically, and a browser gives a list 40px of indent and
+     a bullet by default. Nothing else on the site is a list, so nothing here
+     had ever reset one: the whole wall sat 40px right of everything above it,
+     which is a tenth of a phone screen and reads as sixteen paintings hung
+     off-centre. The bullets never showed only because a grid item is not a
+     list item. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: clamp(1rem, 2.5vw, 2rem);
@@ -316,12 +478,24 @@
 .portrait {
   display: grid;
   gap: 0.6rem;
+  /* Each portrait is stretched to the tallest in its row, and the default
+     `align-content` shares that slack out between the frame row and the text
+     row. So a one-line role left the frame row 12px taller than a two-line
+     one did, and the names sat at different heights along the wall. The slack
+     collects under the text instead: sixteen frames, sixteen names on one
+     line, whatever the roles beneath them run to. */
+  align-content: start;
+  /* Centred, like the label under a hung painting — the wall is one set of
+     framed objects and its captions should be set the same way throughout.
+     A role that wraps to three lines then stays centred under its own frame
+     instead of hanging off one edge of it. */
+  text-align: center;
 }
 
 .portraitFrame {
   position: relative;
   aspect-ratio: 4 / 5;
-  border: clamp(5px, 0.6vw, 9px) solid var(--frame);
+  border: clamp(8px, 0.9vw, 12px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 40%, #7a5f30 75%, var(--frame-lit)) 1;
   box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -353,22 +527,197 @@
   line-height: 1.15;
 }
 
-.portraitTitle {
+.portraitRole {
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--seep);
 }
 
-.portraitRole {
-  font-size: var(--step--1);
-  color: var(--dust);
+.footerCredit a {
+  color: inherit;
 }
 
 .footer {
   padding: clamp(3rem, 8vh, 6rem) var(--gutter);
   display: grid;
-  gap: 0.5rem;
+  gap: clamp(2rem, 5vw, 3rem);
   color: var(--dust);
   font-size: var(--step--1);
   border-top: 1px solid rgba(244, 241, 234, 0.08);
+}
+
+.footerText {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* The platform's mark, signing the footer from the right — the one place on
+   the site where ESN's own identity speaks rather than the museum's. Sized by
+   width, not height: the lockup stacks four lines of wordmark beside the
+   star, so height that looks right for a mark leaves the type at three
+   pixels. The asset is the colour-on-transparent variant with a white
+   wordmark, which is why it can sit straight on --ink with nothing behind
+   it. */
+.footerLogo {
+  width: clamp(170px, 24vw, 260px);
+  height: auto;
+  max-width: 100%;
+  justify-self: start;
+}
+
+/* Side by side once the footer is wide enough to have two sides. The mark is
+   taller than the three lines it sits opposite, so the two are centred
+   against each other rather than sharing a baseline that only one of them
+   has. */
+@media (min-width: 700px) {
+  .footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .footerLogo {
+    justify-self: end;
+  }
+}
+
+/* The carved frame assets (ADR-0004, issue #12), applied as CSS 9-slice so the
+   corners keep their carving while the plain edge moulding stretches to any
+   aspect. Slice values are the measured inset from each edge of the trimmed
+   asset to the aperture, in source pixels.
+
+   The frame hangs *outside* the painting rather than over it. A real frame
+   surrounds a canvas and the canvas edge disappears behind its inner lip —
+   it does not crop the picture. So every frame here is pushed out by its own
+   width and pulled back by --frame-lip, which is the only part that overlaps,
+   and the artwork keeps every pixel it was generated with.
+
+   All of this is gated on `frameAvailable()` having put the attribute on
+   <main>. Without the assets the gradient border sits over the artwork
+   exactly as it always has, and nothing below applies. */
+:global(main[data-frames]) {
+  --frame-lip: 4px;
+}
+
+:global(main[data-frames]) .frame {
+  inset: calc(-1 * var(--fw, 18px) + var(--frame-lip));
+  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
+}
+
+/* The hung and portrait frames are the sizing box with the image inside, so a
+   border on them would shrink the image. The border moves to a pseudo-element
+   laid outside the box instead, and the box keeps its full size. */
+:global(main[data-frames]) .hungFrame {
+  border-width: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+/* With the frame hung outside the box it overhangs below it, and a plain 1rem
+   gap left the moulding sitting across the painting's title. The gap has to
+   clear the overhang — the frame's own width, less the lip that overlaps the
+   canvas — before it is a gap at all. */
+:global(main[data-frames]) .hung {
+  gap: calc(1rem + var(--hung-fw) - var(--frame-lip));
+}
+
+/* The same overhang, the same fix, for a cinematic scene's label — which sits
+   under a frame whose width is animated rather than declared, so the resting
+   width comes in from the choreography that animates it (see Painting's
+   'entering' variant). The gap is sized for the frame at rest; as the approach
+   thins the frame the label is already fading out beneath it. */
+:global(main[data-frames]) .enteringGroup {
+  gap: calc(1.25rem + var(--resting-frame-width, 0px) - var(--frame-lip));
+}
+
+:global(main[data-frames]) .hungFrame::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--hung-fw) + var(--frame-lip));
+  border: var(--hung-fw) solid transparent;
+  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+
+/* The portrait wall is the one place the frame stays inside its box, so each
+   portrait sits back behind its frame instead of filling it edge to edge.
+   The paintings are single works the viewer walks up to and the frame should
+   not take anything from them; the wall is sixteen small objects hung
+   together, and reading as separately hung objects is the point of it. */
+:global(main[data-frames]) .portraitFrame {
+  border-image: url('/frames/portrait.png') 333 305 297 305 stretch;
+}
+
+/* The strait chart (see StraitMap.tsx) — the one drawing on the site that is
+   measured rather than painted, so it is drawn as an engraved chart would be:
+   hairlines only, no fill, the water and the land both left as ink. */
+.strait {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  max-width: 32rem;
+}
+
+.straitSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.straitCoast {
+  fill: none;
+  stroke: rgba(154, 160, 166, 0.5);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  /* The coastline is a hairline at every size — it must not thicken with the
+     viewBox the way a plain stroke-width would. */
+  vector-effect: non-scaling-stroke;
+}
+
+.straitNarrows {
+  stroke: var(--seep);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.straitLeader {
+  stroke: rgba(122, 193, 67, 0.45);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.straitDot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--marble);
+}
+
+.straitCity,
+.straitGap {
+  position: absolute;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.straitCity {
+  color: var(--marble);
+  transform: translate(0.7em, -2.7em);
+}
+
+.straitGap {
+  color: var(--seep);
+  /* Below the leader's end, not beside it — the leader arrives from the upper
+     right, so a label set to either side would be struck through by it. */
+  transform: translate(-50%, 0.5em);
+}
+
+.straitCaption {
+  margin: 0.9rem 0 0;
+  color: var(--dust);
+  font-size: var(--step--1);
+  max-width: 34ch;
 }

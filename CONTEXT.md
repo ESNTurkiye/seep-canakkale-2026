@@ -87,7 +87,7 @@ The gilded surround an artwork or portrait hangs in. A separate transparent asse
 _Avoid_: border, gilt, moulding
 
 **Museum label**:
-The caption block attached to an artwork or portrait — the small typeset plaque carrying the title and, on portraits, the antique title alongside the real role.
+The caption block attached to an artwork or portrait — the small typeset plaque carrying the title and, on portraits, the member's name and their real role.
 _Avoid_: caption, tooltip, plaque
 
 **Myth layer**:

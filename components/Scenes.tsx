@@ -1,7 +1,9 @@
 import type { Scene } from '@/content/scenes'
 import { oc } from '@/content/oc'
 import { event } from '@/content/event'
+import { eventLogo } from '@/lib/availability'
 import { HungPainting } from './HungPainting'
+import { StraitMap } from './StraitMap'
 import s from './museum.module.css'
 
 /** The rest between walls: no artwork, one statement, one green rule. */
@@ -12,7 +14,10 @@ export function StatementScene({ scene }: { scene: Scene }) {
         <p className="eyebrow">{scene.eyebrow}</p>
         <div className={s.rule} />
         <h2 className={s.statementHeadline}>{scene.headline}</h2>
-        <p className={s.statementBody}>{scene.body}</p>
+        <div className={s.statementAside}>
+          {scene.chart === 'strait' ? <StraitMap /> : null}
+          <p className={s.statementBody}>{scene.body}</p>
+        </div>
       </div>
     </section>
   )
@@ -22,9 +27,12 @@ export function StatementScene({ scene }: { scene: Scene }) {
 export function GalleryScene({
   scene,
   availability,
+  realPhotoAvailability,
 }: {
   scene: Scene
   availability: Record<string, boolean>
+  /** See issue #19 — resolved at build time in app/page.tsx, like `availability`. */
+  realPhotoAvailability: Record<string, boolean>
 }) {
   return (
     <section className={s.gallery} aria-label={scene.headline}>
@@ -34,27 +42,16 @@ export function GalleryScene({
         <p className={s.galleryBody}>{scene.body}</p>
       </div>
 
-      <div className={`${s.hang} ${scene.artworks.length > 1 ? s.hangTwo : ''}`}>
+      <div className={`${s.hang} ${scene.artworks.length > 1 ? s.hangWall : ''}`}>
         {scene.artworks.map((artwork) => (
           <HungPainting
             key={artwork.src}
             artwork={artwork}
             available={availability[artwork.src] ?? false}
+            realPhotoAvailable={realPhotoAvailability[artwork.src] ?? false}
           />
         ))}
       </div>
-
-      {scene.kind === 'closing' && (
-        <div className={s.side}>
-          {event.applicationUrl ? (
-            <a className={s.cta} href={event.applicationUrl}>
-              Apply as a delegate
-            </a>
-          ) : (
-            <span className={s.ctaPending}>Applications open soon</span>
-          )}
-        </div>
-      )}
     </section>
   )
 }
@@ -91,7 +88,6 @@ export function PortraitWall({
               </div>
               <div>
                 <p className={s.portraitName}>{member.name}</p>
-                <p className={s.portraitTitle}>{member.antiqueTitle}</p>
                 <p className={s.portraitRole}>{member.role}</p>
               </div>
             </li>
@@ -103,14 +99,30 @@ export function PortraitWall({
 }
 
 export function Footer() {
+  const logo = eventLogo()
+
   return (
     <footer className={s.footer}>
-      <p>
-        {event.name} · {event.dateLabel} · {event.city}, {event.country}
-      </p>
-      <p>
-        Hosted by {event.hostSection} for the {event.platform}.
-      </p>
+      <div className={s.footerText}>
+        <p>
+          {event.name} · {event.dateLabel} · {event.city}, {event.country}
+        </p>
+        <p>
+          Hosted by {event.hostSection} for the {event.platform}.
+        </p>
+        {/* A licence condition of the ODbL data behind the strait chart, not a
+            courtesy — see scripts/derive-strait.mjs. Do not drop it. */}
+        <p className={s.footerCredit}>
+          Coastline data ©{' '}
+          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.
+        </p>
+      </div>
+      {/* The platform signs its own footer. Absent until the file lands (see
+          eventLogo), and the footer reads as it always has without it. */}
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className={s.footerLogo} src={logo} alt={`${event.platform} — ${event.city}`} />
+      ) : null}
     </footer>
   )
 }
