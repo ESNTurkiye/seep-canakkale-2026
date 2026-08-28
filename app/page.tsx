@@ -1,5 +1,6 @@
 import { scenes } from '@/content/scenes'
 import { imageAvailability, videoAvailable, realPhotoAvailable, frameAvailable } from '@/lib/availability'
+import { Curtain } from '@/components/Curtain'
 import { OpeningScene } from '@/components/OpeningScene'
 import { EnteringScene } from '@/components/EnteringScene'
 import { ClosingScene } from '@/components/ClosingScene'
@@ -11,10 +12,19 @@ export default function Home() {
     scenes.flatMap((scene) => scene.artworks.map((artwork) => [artwork.src, realPhotoAvailable(artwork.src)])),
   )
 
+  const frames = frameAvailable()
+
   // One flag for the whole page rather than per painting: every frame on the
   // site switches together or not at all (issue #12).
   return (
-    <main data-frames={frameAvailable() ? '' : undefined}>
+    <main data-frames={frames ? '' : undefined}>
+      {/* Held over the opening until the opening is worth looking at — the
+          still, the frame it hangs in and the faces the headline is set in.
+          Issue #26. */}
+      <Curtain
+        stillSrc={scenes[0].artworks[0].src}
+        frameSrc={frames ? '/frames/landscape.png' : null}
+      />
       {scenes.map((scene) => {
         switch (scene.kind) {
           case 'opening':
