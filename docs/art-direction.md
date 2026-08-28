@@ -228,6 +228,17 @@ One template, unchanged for all sixteen. Only the reference photograph changes.
 
 The bolded sentence exists because the shared style block asks for "idealised anatomy, luminous skin" — exactly what destroys a likeness. The portrait template deliberately contradicts it. Do not merge the two blocks.
 
+### Per-portrait corrections
+
+`scripts/generate.mjs portrait <slug> --note "…"` appends one sentence to the template. The template itself is never edited: identical wording across all sixteen is what makes them read as one wall rather than sixteen separately-negotiated paintings.
+
+A note is for where the photograph misleads about the person, and the two that exist earn their place:
+
+- **`furkan-ucar`** — his photograph is taken in a cap, so the model had nothing above the eyebrows and invented ginger hair and a full beard. The note says he is bald.
+- **`burcu-ozdemir`** — two things. Her hair is long and curly and every take cropped or tied it; "bare neck" in the template appears to pull that way. And the note asks for light makeup and a becoming light, **which deliberately contradicts the template's "do not idealise, do not beautify"**. That was a decision taken with the host section, not a drift: the unbeautified take read gaunt and older than she is, which is its own kind of unlikeness. Do not quietly revert it — and do not generalise it, because that bolded sentence is still what protects the other fifteen.
+
+A note steers a painting back towards the person. It is not a licence to change someone into somebody else, and it never removes the approval in `docs/adr/0002-ai-generated-oc-portraits.md` — the member sees the finished portrait and says yes, note or no note.
+
 In AI Studio, attach the source photograph to the prompt and set the aspect ratio to 4:5. **Start a fresh chat for each member.** In a continuing chat the previous member's photograph and portrait stay in context, and the next face comes back contaminated by them — which is the one failure a wall of sixteen makes obvious.
 
 ### Filenames
