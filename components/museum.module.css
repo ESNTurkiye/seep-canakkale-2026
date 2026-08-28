@@ -340,7 +340,7 @@
 .portraitFrame {
   position: relative;
   aspect-ratio: 4 / 5;
-  border: clamp(9px, 1vw, 15px) solid var(--frame);
+  border: clamp(8px, 0.9vw, 12px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 40%, #7a5f30 75%, var(--frame-lit)) 1;
   box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -412,30 +412,28 @@
 /* The hung and portrait frames are the sizing box with the image inside, so a
    border on them would shrink the image. The border moves to a pseudo-element
    laid outside the box instead, and the box keeps its full size. */
-:global(main[data-frames]) .hungFrame,
-:global(main[data-frames]) .portraitFrame {
+:global(main[data-frames]) .hungFrame {
   border-width: 0;
   overflow: visible;
   box-shadow: none;
 }
 
-:global(main[data-frames]) .hungFrame::after,
-:global(main[data-frames]) .portraitFrame::after {
+:global(main[data-frames]) .hungFrame::after {
   content: '';
   position: absolute;
+  --fw: clamp(15px, 2.2vw, 34px);
   inset: calc(-1 * var(--fw) + var(--frame-lip));
   border: var(--fw) solid transparent;
+  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   pointer-events: none;
 }
 
-:global(main[data-frames]) .hungFrame::after {
-  --fw: clamp(15px, 2.2vw, 34px);
-  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
-  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
-}
-
-:global(main[data-frames]) .portraitFrame::after {
-  --fw: clamp(9px, 1vw, 15px);
+/* The portrait wall is the one place the frame stays inside its box, so each
+   portrait sits back behind its frame instead of filling it edge to edge.
+   The paintings are single works the viewer walks up to and the frame should
+   not take anything from them; the wall is sixteen small objects hung
+   together, and reading as separately hung objects is the point of it. */
+:global(main[data-frames]) .portraitFrame {
   border-image: url('/frames/portrait.png') 333 305 297 305 stretch;
-  box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
 }
