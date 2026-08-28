@@ -6,6 +6,8 @@
  * exists. See docs/art-direction.md for the prompt behind each filename.
  */
 
+import { event } from './event.ts'
+
 export type Artwork = {
   src: string
   /** Shown on the museum label, in italics, as a painting title. */
@@ -153,7 +155,7 @@ export const scenes: Scene[] = [
   {
     id: 'coffee',
     kind: 'artwork',
-    eyebrow: 'Twice a day',
+    eyebrow: 'Twice a day, maybe more',
     headline: 'Everyone has a weak spot.',
     body: 'Ours arrives on a brass tray: tea in tulip glasses, Turkish coffee, and peynir helvası you will look up on the way home.',
     artworks: [
@@ -193,7 +195,7 @@ export const scenes: Scene[] = [
     kind: 'wall',
     eyebrow: 'Where you will stay',
     headline: 'Hospitality was a sacred duty here long before it was an industry.',
-    body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. The Greeks had a word for the rest of it.',
+    body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. You will be looked after better than you asked to be.',
     artworks: [
       {
         src: '/artwork/stay-xenia.jpg',
@@ -223,8 +225,8 @@ export const scenes: Scene[] = [
     id: 'closing',
     kind: 'closing',
     eyebrow: 'Applications',
-    headline: 'We did warn you.',
-    body: 'Places are allocated to sections, and there are never enough of them. Nobody believed her either.',
+    headline: `Applications close on ${event.applicationCloseLabel}.`,
+    body: `Open ${event.applicationWindowLabel}. Cassandra was right as well, and nobody moved until it was too late.`,
     artworks: [
       {
         src: '/artwork/closing-cassandra.jpg',
