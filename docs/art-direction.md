@@ -4,11 +4,53 @@ Every image on this site is generated. This file is the source of truth for how:
 
 ## Masters vs. committed assets
 
-Scene artwork is generated at a large master resolution (5504 × 3072), then downsized to a ~2000px web variant. Only the web variant is committed, to `public/artwork/`. The master is not committed — see `docs/adr/0007-masters-out-of-git.md` — it lives in `assets/artwork-masters/`, which is gitignored. Frames have no separate master: they're generated once directly at their final ~2000px size, straight into `public/frames/`.
+Scene artwork is generated at a large master resolution, then downsized to a ~2000px web variant. Only the web variant is committed, to `public/artwork/`. The master is not committed — see `docs/adr/0007-masters-out-of-git.md` — it lives in `assets/artwork-masters/`, which is gitignored. Frames have no separate master: they're generated once directly at their final ~2000px size, straight into `public/frames/`.
+
+Masters come in at 5504 × 3072, which is 1.79:1 rather than a true 16:9 — that is what the model returns for a 16:9 request at 4K, and it is what the first nine came in at too, so old and new masters are the same size. Well above the 3000px floor rule 2 sets.
 
 **TODO: masters need a shared archive location, not just one contributor's laptop. Not decided yet — name it here once it exists.**
 
-Target model: Nano Banana Pro (Gemini 3 Pro Image) via Higgsfield. Any model that preserves identity from a reference photograph works for the portraits; the scene artworks are model-agnostic.
+Target model: Nano Banana Pro (Gemini 3 Pro Image), used directly in Google AI Studio — see "Producing an image in Google AI Studio" below. The first nine artworks and the two frames were made through Higgsfield, which is no longer available to us; it was only ever a front end for this same model, so not one prompt in this file changes. Any model that preserves identity from a reference photograph works for the portraits; the scene artworks are model-agnostic.
+
+## Producing an image in Google AI Studio
+
+Everything is done by hand at [aistudio.google.com](https://aistudio.google.com), on the **Gemini 3 Pro Image** model — that is Nano Banana Pro's product name. The prompts in this file are the entire input; paste one unchanged.
+
+### Account and billing
+
+AI Studio must be pointed at a Google Cloud project with a billing account attached, and generation happens on the **paid tier**. This is not optional and not only about money:
+
+- 4K output and Veo are not available on the free tier at all.
+- The free tier may use what you send it to improve Google's products; the paid tier does not. Sixteen Organising Committee members' photographs go through this pipeline under the consent recorded in `docs/adr/0002-ai-generated-oc-portraits.md`. Paid tier is the tier that consent was given for.
+
+Funding comes from Google Developer Program Premium monthly Gen AI credits, which accrue on the billing account and expire a year after each is issued. The whole remaining asset backlog costs a small fraction of one year's accrual — images are cents, and Veo is the only line that moves.
+
+**A credit is not a spending cap.** When it runs out the billing account keeps charging the card, silently. Set a monthly budget and an alert under Billing → Budgets & alerts before the first generation, not after.
+
+| | Aspect ratio | Resolution | Reference image |
+|---|---|---|---|
+| Scene artwork | 16:9 | 4K | none |
+| Frames | 16:9 / 4:5 | 2K | none |
+| Portrait | 4:5 | 2K | the member's source photograph |
+
+- **Aspect ratio and resolution are controls in the panel, not prompt text.** Set them there. The shared style block below ends with "16:9" — leave it: the nine existing artworks were generated with that exact string and the set's consistency outranks tidiness. But never *add* "4K" or "3840 × 2160" to a prompt.
+- **2K is right for portraits and frames.** 2K is already four times the 800 × 1000 a portrait is committed at, and twice the ~2000px a frame ships at. 4K buys nothing there and generates more slowly.
+- If a Google Search grounding toggle is offered, leave it off. It exists for factual graphics and data visualisation; on a Bouguereau pastiche it drags the image towards photographic reference.
+- Every image AI Studio returns carries an invisible SynthID watermark. This is fine — the site does not claim these are photographs — but it means the artwork is detectable as generated, which the OC should know before approving a portrait.
+
+### Deriving the web variant by hand
+
+`package.json` has `npm run art`, pointing at `scripts/derive-artwork.mjs` — that file is not in this repository and not in its history, so the command does not run. Until it exists, downsize with ffmpeg:
+
+```
+# scene artwork: master -> the committed 2000px JPEG
+ffmpeg -i assets/artwork-masters/<name>.png -vf scale=2000:-2 -q:v 3 public/artwork/<name>.jpg
+
+# portrait: AI Studio download -> the committed 800px PNG
+ffmpeg -i <download>.png -vf scale=800:-2 public/portraits/<slug>.png
+```
+
+Keep the scene master in `assets/artwork-masters/` under the same base name as the committed file. It is gitignored, which is not the same as disposable.
 
 ## Rules that apply to every image
 
@@ -23,9 +65,14 @@ Target model: Nano Banana Pro (Gemini 3 Pro Image) via Higgsfield. Any model tha
 
 Prepend this to every scene prompt:
 
-> A museum-quality Neoclassical oil painting inspired by High Renaissance composition and 19th-century Academic Realism, in the style of William-Adolphe Bouguereau, Frederic Leighton, Lawrence Alma-Tadema and Jean-Léon Gérôme. Elegant figures with flowing drapery, idealised anatomy, luminous skin, rich oil paint textures, harmonious composition, dramatic clouds, the Dardanelles strait and Aegean landscape, timeless classical beauty, subtly blended with surreal contemporary elements. Late-afternoon light from the left. Palette of Aegean blue, marble white, olive green, terracotta and warm grey. No text anywhere in the image. 16:9.
+> A museum-quality Neoclassical oil painting inspired by High Renaissance composition and 19th-century Academic Realism, in the style of William-Adolphe Bouguereau, Frederic Leighton, Lawrence Alma-Tadema and Jean-Léon Gérôme. Elegant figures with flowing drapery, idealised anatomy, luminous skin, rich oil paint textures, harmonious composition, dramatic clouds, the Dardanelles strait and Aegean landscape, timeless classical beauty, subtly blended with surreal contemporary elements. Late-afternoon light from the left. Restrained, muted tonality with soft atmospheric haze — not vivid, not high-contrast. Palette of Aegean blue, marble white, olive green, terracotta and warm grey. The only contemporary object in the painting is the one this scene names; every ship, building and garment other than that object is ancient. No text, no signature, and no painted frame or border anywhere in the image. 16:9.
+
+Two clauses in that block were added after the first nine were generated, because rule 4 and rule 5 were written down here but never actually reached the model — only this block and the scene paragraph are sent. The muted-tonality clause holds the set to one palette; the one-object clause stops a second anachronism drifting in, which is how a modern freighter turned up on the horizon of a beacon scene. The first nine were generated without them and are not to be regenerated.
 
 ## Scene artwork
+
+`scripts/generate.mjs` reads the prompts below straight out of this file, so the structure matters: **the first paragraph under a scene heading is the prompt, verbatim.** Anything addressed to a human — rationale, warnings, comparisons between scenes — goes in a later paragraph, or the model reads it as instruction.
+
 
 ### 1. `opening-trojan-horse.jpg` — Opening
 
@@ -65,7 +112,9 @@ The Homeric rite of guest-friendship: a host kneeling at the threshold of a colo
 
 ### 7b. `stay-kule-beacon.jpg` — Where you'll stay, Kule Otel
 
-Hestia's kept flame, high above the strait: a keeper standing at the top of a stone tower, tending a great hearth-brazier that burns as a beacon over the darkening water, guiding travellers home. The view is from beside the keeper, looking out over the tower's edge rather than up from the shore — a different vantage from Scene 3's crossing. A modern hard-shell rolling suitcase rests at the foot of the tower, below the keeper, handle extended. Figure and brazier upper-right; lower-left is open sky and sea.
+Hestia's kept flame, high above the strait: a keeper standing at the top of a stone tower, tending a great hearth-brazier that burns as a beacon over the darkening water, guiding travellers home. The view is from beside the keeper, looking out over the tower's edge rather than up from the shore. A modern hard-shell rolling suitcase rests at the foot of the tower, below the keeper, handle extended. Figure and brazier upper-right; lower-left is open sky and sea.
+
+_Not part of the prompt: that vantage deliberately differs from Scene 3, which sees a tower from the water. The two must not read as the same view twice._
 
 ### 8. Scene 8 uses portraits, not scene artwork
 
@@ -103,6 +152,27 @@ Shared rules for every loop, regardless of scene:
 - 3–4 seconds, **seamless** — the last frame must meet the first. Silent. No camera move: the scroll already moves the frame, and a second movement fights it.
 - Deliver `<base>.mp4` and `<base>.webm` into `public/artwork/`, next to the still under the same base name. The still stays as poster and fallback.
 - If the loop is not seamless, we ship the still. A visible jump is worse than no motion.
+
+### Producing a loop in Google AI Studio
+
+Use **Veo 3.1**, in the same AI Studio project. Seamlessness is the hard part — a freely generated clip almost never lands back on its opening frame, and a loop that does not is not shipped. Veo 3.1 accepts a first frame *and* a last frame, so hand it the same file twice:
+
+- **First frame**: the finished still, e.g. `public/artwork/opening-trojan-horse.jpg`.
+- **Last frame**: that same file again. The clip is then obliged to return to where it began, which is exactly the rule above rather than a lucky take.
+- **Prompt**: only what moves, one sentence, taken from the per-scene note below. Do not re-describe the painting — the two frames already carry it.
+- **Duration**: 4 seconds.
+- **Audio**: the site has no sound. Whatever Veo generates is stripped in the encode.
+
+Veo tops out at 1080p, so a loop is 1920 × 1080 against a 2000 × 1116 still. `object-fit: cover` absorbs that; do not upscale the video to match the still.
+
+Encode both files from the download:
+
+```
+ffmpeg -i <veo>.mp4 -an -c:v libx264 -crf 23 -pix_fmt yuv420p -movflags +faststart public/artwork/<name>.mp4
+ffmpeg -i <veo>.mp4 -an -c:v libvpx-vp9 -crf 34 -b:v 0 public/artwork/<name>.webm
+```
+
+Then watch the join, several times round, before committing. If the last frame does not truly meet the first, the still ships instead.
 
 ### The opening — `opening-trojan-horse`
 
@@ -157,6 +227,8 @@ One template, unchanged for all sixteen. Only the reference photograph changes.
 > Head-and-shoulders portrait in the style of a 19th-century Academic Realist oil painting — Bouguereau and Alma-Tadema — painted on canvas with visible brushwork and a warm varnish. **Preserve the face from the reference photograph exactly: the same bone structure, the same nose, the same eyes, the same mouth, the same skin tone, the same hair. Do not idealise, do not beautify, do not slim, do not change the age.** Restyle only what surrounds the face: classical drapery over one shoulder, bare neck, no modern clothing. Plain warm-grey painted background with a soft vignette. Even light from the left. Palette of warm grey, terracotta and olive. No text. 4:5 portrait.
 
 The bolded sentence exists because the shared style block asks for "idealised anatomy, luminous skin" — exactly what destroys a likeness. The portrait template deliberately contradicts it. Do not merge the two blocks.
+
+In AI Studio, attach the source photograph to the prompt and set the aspect ratio to 4:5. **Start a fresh chat for each member.** In a continuing chat the previous member's photograph and portrait stay in context, and the next face comes back contaminated by them — which is the one failure a wall of sixteen makes obvious.
 
 ### Filenames
 
