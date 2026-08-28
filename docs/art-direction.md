@@ -122,7 +122,9 @@ Figures in classical drapery joined in a circle dance on a marble terrace at nig
 
 ### 7a. `stay-xenia.jpg` — Where you'll stay, Temizay Otel
 
-The Homeric rite of guest-friendship: a host kneeling at the threshold of a colonnaded villa, washing the feet of an arriving traveller who is seated and clearly exhausted from a long journey. Beside the traveller stands a modern hard-shell rolling suitcase, upright, handle extended. On a marble side table, a small brass reception bell. Evening light through the columns. Lower-left is threshold stone.
+The Homeric rite of guest-friendship: at the threshold of a colonnaded villa above the sea, a host and a newly arrived traveller stand facing each other, both upright and at the same height, eyes level. The host holds out a shallow clay cup of water in both hands and the traveller takes it in both of theirs, the four hands together on the cup — water offered at the door before a single question is asked. Beside them stands a modern hard-shell rolling suitcase, upright, handle extended. On a marble side table, a small brass reception bell. Evening light through the columns. Figures right of centre; lower-left is threshold stone and open sea.
+
+Regenerated. The first version staged the rite as Homer wrote it — a woman kneeling on the floor to wash a seated man's bare feet — and that image does not survive being looked at in 2026 by the people it is meant to welcome: it reads as a servant and a master, and specifically as a woman serving a man's body. The myth is not the problem and has not changed; the staging was. Water at the door is the same rite, given by equals standing, and it is the same gesture the section actually performs at a hotel entrance. Keep both figures standing and at eye level in any future take: the moment either one is above or behind the other, the old reading comes back.
 
 ### 7b. `stay-kule-beacon.jpg` — Where you'll stay, Kule Otel
 

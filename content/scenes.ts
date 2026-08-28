@@ -202,7 +202,7 @@ export const scenes: Scene[] = [
         title: 'Xenia',
         myth: 'after the Homeric rite of guest-friendship',
         venue: 'Temizay Otel',
-        alt: 'A host kneeling to wash the feet of an arriving traveller at a colonnaded threshold, a modern rolling suitcase standing beside them.',
+        alt: 'A host and a newly arrived traveller standing face to face at a colonnaded threshold, both hands of each on a shared cup of water, a modern rolling suitcase beside them.',
       },
       {
         src: '/artwork/stay-kule-beacon.jpg',
