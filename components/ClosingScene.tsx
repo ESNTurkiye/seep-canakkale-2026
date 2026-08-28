@@ -97,7 +97,7 @@ export function ClosingScene({
       <div className={s.stage}>
         <motion.div className={s.wall} style={{ opacity: wallOpacity }} />
 
-        <div className={s.canvasWrap}>
+        <div className={`${s.canvasWrap} ${s.closingCanvas}`}>
           <Painting
             variant="entering"
             artwork={artwork}
