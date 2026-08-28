@@ -1,6 +1,7 @@
 import type { Scene } from '@/content/scenes'
 import { oc } from '@/content/oc'
 import { event } from '@/content/event'
+import { eventLogo } from '@/lib/availability'
 import { HungPainting } from './HungPainting'
 import { StraitMap } from './StraitMap'
 import s from './museum.module.css'
@@ -98,20 +99,30 @@ export function PortraitWall({
 }
 
 export function Footer() {
+  const logo = eventLogo()
+
   return (
     <footer className={s.footer}>
-      <p>
-        {event.name} · {event.dateLabel} · {event.city}, {event.country}
-      </p>
-      <p>
-        Hosted by {event.hostSection} for the {event.platform}.
-      </p>
-      {/* A licence condition of the ODbL data behind the strait chart, not a
-          courtesy — see scripts/derive-strait.mjs. Do not drop it. */}
-      <p className={s.footerCredit}>
-        Coastline data ©{' '}
-        <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.
-      </p>
+      <div className={s.footerText}>
+        <p>
+          {event.name} · {event.dateLabel} · {event.city}, {event.country}
+        </p>
+        <p>
+          Hosted by {event.hostSection} for the {event.platform}.
+        </p>
+        {/* A licence condition of the ODbL data behind the strait chart, not a
+            courtesy — see scripts/derive-strait.mjs. Do not drop it. */}
+        <p className={s.footerCredit}>
+          Coastline data ©{' '}
+          <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.
+        </p>
+      </div>
+      {/* The platform signs its own footer. Absent until the file lands (see
+          eventLogo), and the footer reads as it always has without it. */}
+      {logo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img className={s.footerLogo} src={logo} alt={`${event.platform} — ${event.city}`} />
+      ) : null}
     </footer>
   )
 }

@@ -24,6 +24,23 @@ export function imageAvailability(): Record<string, boolean> {
 }
 
 /**
+ * The platform's own logo, if it has been put in place — the ESN star with
+ * the SEEP lockup and the host city, which is a brand asset ESN issues
+ * rather than anything this repository generates or may redraw. Same
+ * file-presence contract as the artwork: drop the file in and the next build
+ * carries it; until then the footer simply does not have a logo in it.
+ *
+ * The filename is ESN's own, kept unchanged rather than tidied: `colour-white`
+ * names the variant (colour star, white wordmark) and is what makes it the
+ * right file for a footer on --ink. Renaming it would throw away the only
+ * record of which official variant this is.
+ */
+export function eventLogo(): string | null {
+  const file = '/logo/web-SEEP-CANAKKALE-colour-white@4x.png'
+  return fs.existsSync(path.join(process.cwd(), 'public', file)) ? file : null
+}
+
+/**
  * Whether a cinematic scene's animated loop (docs/adr/0006) has landed for a
  * given artwork. Both encodes are delivered together, so either missing
  * falls back to the still — a scene must render exactly as it does today

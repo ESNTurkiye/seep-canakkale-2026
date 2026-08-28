@@ -483,10 +483,43 @@
 .footer {
   padding: clamp(3rem, 8vh, 6rem) var(--gutter);
   display: grid;
-  gap: 0.5rem;
+  gap: clamp(2rem, 5vw, 3rem);
   color: var(--dust);
   font-size: var(--step--1);
   border-top: 1px solid rgba(244, 241, 234, 0.08);
+}
+
+.footerText {
+  display: grid;
+  gap: 0.5rem;
+}
+
+/* The platform's mark, signing the footer from the right — the one place on
+   the site where ESN's own identity speaks rather than the museum's. Sized by
+   width, not height: the lockup stacks four lines of wordmark beside the
+   star, so height that looks right for a mark leaves the type at three
+   pixels. The asset is the colour-on-transparent variant with a white
+   wordmark, which is why it can sit straight on --ink with nothing behind
+   it. */
+.footerLogo {
+  width: clamp(170px, 24vw, 260px);
+  height: auto;
+  max-width: 100%;
+  justify-self: start;
+}
+
+/* Side by side once the footer is wide enough to have two sides. The mark is
+   taller than the three lines it sits opposite, so the two are centred
+   against each other rather than sharing a baseline that only one of them
+   has. */
+@media (min-width: 700px) {
+  .footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .footerLogo {
+    justify-self: end;
+  }
 }
 
 /* The carved frame assets (ADR-0004, issue #12), applied as CSS 9-slice so the
