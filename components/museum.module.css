@@ -89,7 +89,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  border-width: 18px;
+  border-width: var(--fw, 18px);
   border-style: solid;
   border-color: var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
@@ -386,25 +386,56 @@
   border-top: 1px solid rgba(244, 241, 234, 0.08);
 }
 
-/* Border widths above are chosen for these assets: border-image squeezes each
-   carved corner into exactly border-width pixels, so too thin turns acanthus
-   into a smudge. The portrait wall keeps the thinnest of the three because
-   its frames sit at ~150px wide in the grid, where the landscape frame's
-   weight would swamp the face.
-
-   The carved frame assets (ADR-0004, issue #12), applied as CSS 9-slice so the
+/* The carved frame assets (ADR-0004, issue #12), applied as CSS 9-slice so the
    corners keep their carving while the plain edge moulding stretches to any
    aspect. Slice values are the measured inset from each edge of the trimmed
    asset to the aperture, in source pixels.
 
-   These rules override the gradient border above, and only when
-   `frameAvailable()` has put the attribute on <main> — so a repository
-   without the assets renders exactly as it did before. */
-:global(main[data-frames]) .frame,
-:global(main[data-frames]) .hungFrame {
+   The frame hangs *outside* the painting rather than over it. A real frame
+   surrounds a canvas and the canvas edge disappears behind its inner lip —
+   it does not crop the picture. So every frame here is pushed out by its own
+   width and pulled back by --frame-lip, which is the only part that overlaps,
+   and the artwork keeps every pixel it was generated with.
+
+   All of this is gated on `frameAvailable()` having put the attribute on
+   <main>. Without the assets the gradient border sits over the artwork
+   exactly as it always has, and nothing below applies. */
+:global(main[data-frames]) {
+  --frame-lip: 4px;
+}
+
+:global(main[data-frames]) .frame {
+  inset: calc(-1 * var(--fw, 18px) + var(--frame-lip));
   border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
 }
 
+/* The hung and portrait frames are the sizing box with the image inside, so a
+   border on them would shrink the image. The border moves to a pseudo-element
+   laid outside the box instead, and the box keeps its full size. */
+:global(main[data-frames]) .hungFrame,
 :global(main[data-frames]) .portraitFrame {
+  border-width: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+:global(main[data-frames]) .hungFrame::after,
+:global(main[data-frames]) .portraitFrame::after {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--fw) + var(--frame-lip));
+  border: var(--fw) solid transparent;
+  pointer-events: none;
+}
+
+:global(main[data-frames]) .hungFrame::after {
+  --fw: clamp(15px, 2.2vw, 34px);
+  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
+}
+
+:global(main[data-frames]) .portraitFrame::after {
+  --fw: clamp(9px, 1vw, 15px);
   border-image: url('/frames/portrait.png') 333 305 297 305 stretch;
+  box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
 }

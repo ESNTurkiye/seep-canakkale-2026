@@ -101,7 +101,7 @@ export function Painting(props: PaintingProps) {
           </div>
           <motion.div
             className={s.frame}
-            style={{ opacity: frameOpacity, borderWidth: frameWidth }}
+            style={{ opacity: frameOpacity, ['--fw' as string]: frameWidth }}
           />
         </motion.div>
         <motion.div className={s.label} style={{ opacity: labelOpacity, bottom: '6svh' }}>
@@ -132,7 +132,7 @@ export function Painting(props: PaintingProps) {
           </div>
           <motion.div
             className={s.frame}
-            style={{ opacity: frameOpacity, borderWidth: frameWidth }}
+            style={{ opacity: frameOpacity, ['--fw' as string]: frameWidth }}
           />
         </motion.div>
         <motion.div className={s.enteringLabel} style={{ opacity: labelOpacity }}>
