@@ -33,6 +33,16 @@ export type Scene = {
    */
   cinematic?: boolean
   /**
+   * A line chart hung on a typographic wall in place of a painting. Which wall
+   * carries one is a content decision, like `cinematic` — but unlike a
+   * painting, a chart is only worth its space when it *shows* what the
+   * headline claims. `'strait'` draws the Dardanelles from real coastline
+   * geometry and marks the narrowest crossing, which is the whole of the
+   * "This Year" headline. See `content/strait.ts` and
+   * `scripts/derive-strait.mjs`.
+   */
+  chart?: 'strait'
+  /**
    * Whether a cinematic scene recedes back to its hung size after reaching
    * peak (the default, `true` — a gallery walk-past). Set to `false` for a
    * scene that instead holds at peak and hands off to the next scene via the
@@ -65,6 +75,7 @@ export const scenes: Scene[] = [
     eyebrow: 'This year',
     headline: 'The largest of the five platforms is coming to the narrowest water in Europe.',
     body: 'Fifteen member countries. Once a year. Hosted by ESN Çanakkale.',
+    chart: 'strait',
     artworks: [],
   },
   {
@@ -201,6 +212,13 @@ for (const scene of scenes) {
       `Scene "${scene.id}" sets \`cinematic\` but is kind "${scene.kind}" — that kind is always fully ` +
         `choreographed via its own dedicated component, so \`cinematic\` is meaningless (and ignored by ` +
         `app/page.tsx's dispatch) there.`,
+    )
+  }
+  if (scene.chart && scene.kind !== 'typographic') {
+    throw new Error(
+      `Scene "${scene.id}" sets \`chart\` but is kind "${scene.kind}" — only a typographic wall ` +
+        `renders one; every other kind hangs paintings, and StatementScene is the only component ` +
+        `that reads \`chart\`.`,
     )
   }
   if (scene.recede !== undefined && !scene.cinematic) {

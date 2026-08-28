@@ -217,7 +217,7 @@
 
 /* Typographic scene — the rest between walls. */
 .statement {
-  min-height: 92svh;
+  min-height: 100svh;
   display: grid;
   align-content: center;
   gap: 2rem;
@@ -226,19 +226,49 @@
 }
 
 .statementInner {
-  max-width: 22ch;
   display: grid;
   gap: 1.5rem;
 }
 
+/* Wide enough to be a wall, not a column. The headline carries its own
+   measure in its own (display) face — the previous 22ch cap sat on this
+   wrapper instead, where `ch` resolves against the body face and squeezed a
+   --step-4 headline into eight lines down the left edge of an otherwise empty
+   screen. Body copy moves to a second column so the statement composes across
+   the width, the way the opening's copy does. */
+@media (min-width: 900px) {
+  .statementInner {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    column-gap: clamp(3rem, 7vw, 8rem);
+    align-items: end;
+  }
+  .statementInner > :global(.eyebrow),
+  .statementInner .rule {
+    grid-column: 1 / -1;
+  }
+  .statementHeadline {
+    grid-column: 1;
+  }
+  .statementAside {
+    grid-column: 2;
+  }
+}
+
+.statementAside {
+  display: grid;
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+  align-content: end;
+}
+
 .statementHeadline {
-  font-size: var(--step-3);
-  max-width: 20ch;
+  font-size: var(--step-4);
+  max-width: 18ch;
 }
 
 .statementBody {
   max-width: var(--measure);
   color: var(--dust);
+  font-size: var(--step-1);
 }
 
 .rule {
@@ -377,6 +407,10 @@
   color: var(--seep);
 }
 
+.footerCredit a {
+  color: inherit;
+}
+
 .footer {
   padding: clamp(3rem, 8vh, 6rem) var(--gutter);
   display: grid;
@@ -436,4 +470,80 @@
    together, and reading as separately hung objects is the point of it. */
 :global(main[data-frames]) .portraitFrame {
   border-image: url('/frames/portrait.png') 333 305 297 305 stretch;
+}
+
+/* The strait chart (see StraitMap.tsx) — the one drawing on the site that is
+   measured rather than painted, so it is drawn as an engraved chart would be:
+   hairlines only, no fill, the water and the land both left as ink. */
+.strait {
+  position: relative;
+  margin: 0;
+  width: 100%;
+  max-width: 32rem;
+}
+
+.straitSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.straitCoast {
+  fill: none;
+  stroke: rgba(154, 160, 166, 0.5);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  /* The coastline is a hairline at every size — it must not thicken with the
+     viewBox the way a plain stroke-width would. */
+  vector-effect: non-scaling-stroke;
+}
+
+.straitNarrows {
+  stroke: var(--seep);
+  stroke-width: 1.25;
+  vector-effect: non-scaling-stroke;
+}
+
+.straitLeader {
+  stroke: rgba(122, 193, 67, 0.45);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.straitDot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--marble);
+}
+
+.straitCity,
+.straitGap {
+  position: absolute;
+  font-family: var(--font-display), sans-serif;
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.straitCity {
+  color: var(--marble);
+  transform: translate(0.7em, -2.7em);
+}
+
+.straitGap {
+  color: var(--seep);
+  /* Below the leader's end, not beside it — the leader arrives from the upper
+     right, so a label set to either side would be struck through by it. */
+  transform: translate(-50%, 0.5em);
+}
+
+.straitCaption {
+  margin: 0.9rem 0 0;
+  color: var(--dust);
+  font-size: var(--step--1);
+  max-width: 34ch;
 }

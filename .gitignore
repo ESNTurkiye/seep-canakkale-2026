@@ -18,3 +18,7 @@ assets/source-photos/*
 # out of git avoids permanently accumulating every regenerated painting.
 # See docs/adr/0007-masters-out-of-git.md
 assets/artwork-masters/
+
+# Cached Overpass response for scripts/derive-strait.mjs — a download, not a source.
+.cache/
+

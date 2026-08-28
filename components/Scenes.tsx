@@ -2,6 +2,7 @@ import type { Scene } from '@/content/scenes'
 import { oc } from '@/content/oc'
 import { event } from '@/content/event'
 import { HungPainting } from './HungPainting'
+import { StraitMap } from './StraitMap'
 import s from './museum.module.css'
 
 /** The rest between walls: no artwork, one statement, one green rule. */
@@ -12,7 +13,10 @@ export function StatementScene({ scene }: { scene: Scene }) {
         <p className="eyebrow">{scene.eyebrow}</p>
         <div className={s.rule} />
         <h2 className={s.statementHeadline}>{scene.headline}</h2>
-        <p className={s.statementBody}>{scene.body}</p>
+        <div className={s.statementAside}>
+          {scene.chart === 'strait' ? <StraitMap /> : null}
+          <p className={s.statementBody}>{scene.body}</p>
+        </div>
       </div>
     </section>
   )
@@ -101,6 +105,12 @@ export function Footer() {
       </p>
       <p>
         Hosted by {event.hostSection} for the {event.platform}.
+      </p>
+      {/* A licence condition of the ODbL data behind the strait chart, not a
+          courtesy — see scripts/derive-strait.mjs. Do not drop it. */}
+      <p className={s.footerCredit}>
+        Coastline data ©{' '}
+        <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ODbL.
       </p>
     </footer>
   )
