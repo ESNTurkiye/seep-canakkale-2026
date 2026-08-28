@@ -1,6 +1,7 @@
 import { test, describe } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  FRAME_WIDTH_PX,
   openingChoreography,
   openingRest,
   openingPeakProgress,
@@ -38,7 +39,7 @@ describe('openingChoreography — progress 0 (top of the scroll, hung and framed
   test('the frame is fully present', () => {
     const state = choreograph(0)
     assert.equal(state.frameOpacity, 1)
-    assert.equal(state.frameWidthPx, 18)
+    assert.equal(state.frameWidthPx, FRAME_WIDTH_PX)
   })
 
   test('the gallery wall is fully present', () => {
@@ -232,7 +233,7 @@ describe('openingChoreography — reduced motion', () => {
       scale: 1,
       wallOpacity: 1,
       frameOpacity: 1,
-      frameWidthPx: 18,
+      frameWidthPx: FRAME_WIDTH_PX,
       copyOpacity: 1,
       labelOpacity: 0,
     })
@@ -265,9 +266,9 @@ describe('enteringChoreography — at rest, before and after the approach', () =
 
   test('the frame is fully present at both ends of the track', () => {
     assert.equal(enter(0).frameOpacity, 1)
-    assert.equal(enter(0).frameWidthPx, 18)
+    assert.equal(enter(0).frameWidthPx, FRAME_WIDTH_PX)
     assert.equal(enter(1).frameOpacity, 1)
-    assert.equal(enter(1).frameWidthPx, 18)
+    assert.equal(enter(1).frameWidthPx, FRAME_WIDTH_PX)
   })
 
   test('the copy is fully hidden at both ends of the track', () => {
@@ -429,7 +430,7 @@ describe('enteringChoreography — reduced motion', () => {
       scale: 1,
       wallOpacity: 1,
       frameOpacity: 1,
-      frameWidthPx: 18,
+      frameWidthPx: FRAME_WIDTH_PX,
       copyOpacity: 1,
       labelOpacity: 1,
     }
@@ -454,7 +455,7 @@ describe('enteringChoreography — recede: false — progress 0 (hung and framed
 
   test('the frame is fully present', () => {
     assert.equal(enterHold(0).frameOpacity, 1)
-    assert.equal(enterHold(0).frameWidthPx, 18)
+    assert.equal(enterHold(0).frameWidthPx, FRAME_WIDTH_PX)
   })
 
   test('the copy is fully hidden', () => {
@@ -610,7 +611,7 @@ describe('enteringChoreography — recede: false — clamping and reduced motion
       scale: 1,
       wallOpacity: 1,
       frameOpacity: 1,
-      frameWidthPx: 18,
+      frameWidthPx: FRAME_WIDTH_PX,
       copyOpacity: 1,
       labelOpacity: 1,
     }
@@ -658,7 +659,7 @@ describe('closingChoreography — at and after closingRestProgress (receded to r
   test('the frame, wall and label are all fully present', () => {
     const state = close(closingRestProgress)
     assert.equal(state.frameOpacity, 1)
-    assert.equal(state.frameWidthPx, 18)
+    assert.equal(state.frameWidthPx, FRAME_WIDTH_PX)
     assert.equal(state.wallOpacity, 1)
     assert.equal(state.labelOpacity, 1)
   })
@@ -722,7 +723,7 @@ describe('closingChoreography — reduced motion', () => {
       scale: 1,
       wallOpacity: 1,
       frameOpacity: 1,
-      frameWidthPx: 18,
+      frameWidthPx: FRAME_WIDTH_PX,
       labelOpacity: 1,
     })
   })

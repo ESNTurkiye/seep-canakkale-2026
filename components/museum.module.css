@@ -296,7 +296,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: clamp(8px, 1.1vw, 16px) solid var(--frame);
+  border: clamp(12px, 1.7vw, 26px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -340,7 +340,7 @@
 .portraitFrame {
   position: relative;
   aspect-ratio: 4 / 5;
-  border: clamp(5px, 0.6vw, 9px) solid var(--frame);
+  border: clamp(7px, 0.8vw, 12px) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 40%, #7a5f30 75%, var(--frame-lit)) 1;
   box-shadow: 0 20px 40px -22px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -384,4 +384,27 @@
   color: var(--dust);
   font-size: var(--step--1);
   border-top: 1px solid rgba(244, 241, 234, 0.08);
+}
+
+/* Border widths above are chosen for these assets: border-image squeezes each
+   carved corner into exactly border-width pixels, so too thin turns acanthus
+   into a smudge. The portrait wall keeps the thinnest of the three because
+   its frames sit at ~150px wide in the grid, where the landscape frame's
+   weight would swamp the face.
+
+   The carved frame assets (ADR-0004, issue #12), applied as CSS 9-slice so the
+   corners keep their carving while the plain edge moulding stretches to any
+   aspect. Slice values are the measured inset from each edge of the trimmed
+   asset to the aperture, in source pixels.
+
+   These rules override the gradient border above, and only when
+   `frameAvailable()` has put the attribute on <main> — so a repository
+   without the assets renders exactly as it did before. */
+:global(main[data-frames]) .frame,
+:global(main[data-frames]) .hungFrame {
+  border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
+}
+
+:global(main[data-frames]) .portraitFrame {
+  border-image: url('/frames/portrait.png') 333 305 297 305 stretch;
 }

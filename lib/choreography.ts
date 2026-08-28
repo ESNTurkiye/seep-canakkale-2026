@@ -40,10 +40,23 @@ const inkStart = 0.88
  * the ink crossfade. One function so retuning one doesn't silently desync
  * the other.
  */
+/**
+ * The frame's resting thickness, in CSS pixels.
+ *
+ * It is a visual constant, not a free parameter. The gilt frame is a 9-slice
+ * asset (issue #12) whose corners carry acanthus carving, and border-image
+ * squeezes each corner into exactly this many pixels. At 18 the carving
+ * collapsed into a dark smudge while the straight edges still read fine —
+ * the corners have to be given room or the asset is worse than the gradient
+ * it replaced. Raising this is what buys that room; the ramps below animate
+ * to and from it, and the tests assert against it rather than a literal.
+ */
+export const FRAME_WIDTH_PX = 34
+
 function approachCrossfade(p: number) {
   return {
     frameOpacity: ramp(p, 0.28, 0.52, 1, 0),
-    frameWidthPx: ramp(p, 0.24, 0.52, 18, 0),
+    frameWidthPx: ramp(p, 0.24, 0.52, FRAME_WIDTH_PX, 0),
     copyOpacity: ramp(p, 0.42, 0.65, 0, 1),
     labelOpacity: ramp(p, 0.04, 0.2, 1, 0),
   }
@@ -63,7 +76,7 @@ export const openingRest: OpeningState = {
   scale: 1,
   wallOpacity: 1,
   frameOpacity: 1,
-  frameWidthPx: 18,
+  frameWidthPx: FRAME_WIDTH_PX,
   copyOpacity: 1,
   labelOpacity: 0,
 }
@@ -120,7 +133,7 @@ export const enteringRest: EnteringState = {
   scale: 1,
   wallOpacity: 1,
   frameOpacity: 1,
-  frameWidthPx: 18,
+  frameWidthPx: FRAME_WIDTH_PX,
   copyOpacity: 1,
   labelOpacity: 1,
 }
@@ -188,7 +201,7 @@ export function enteringChoreography(
     scale: p < 0.5 ? ramp(p, 0, 0.5, 1, peak) : ramp(p, 0.5, 1, peak, 1),
     wallOpacity: 1,
     frameOpacity: p < 0.5 ? ramp(p, 0.14, 0.26, 1, 0) : ramp(p, 0.74, 0.86, 0, 1),
-    frameWidthPx: p < 0.5 ? ramp(p, 0.12, 0.26, 18, 0) : ramp(p, 0.74, 0.88, 0, 18),
+    frameWidthPx: p < 0.5 ? ramp(p, 0.12, 0.26, FRAME_WIDTH_PX, 0) : ramp(p, 0.74, 0.88, 0, FRAME_WIDTH_PX),
     copyOpacity: p < 0.5 ? ramp(p, 0.21, 0.325, 0, 1) : ramp(p, 0.675, 0.79, 1, 0),
     labelOpacity: p < 0.5 ? ramp(p, 0, 0.2, 1, 0) : ramp(p, 0.8, 1, 0, 1),
   }
@@ -212,7 +225,7 @@ export const closingRest: ClosingState = {
   scale: 1,
   wallOpacity: 1,
   frameOpacity: 1,
-  frameWidthPx: 18,
+  frameWidthPx: FRAME_WIDTH_PX,
   labelOpacity: 1,
 }
 
@@ -273,7 +286,7 @@ export function closingChoreography(
     scale: ramp(p, 0, closingRestProgress, peak, 1),
     wallOpacity: ramp(p, 0.19, 0.53, 0, 1),
     frameOpacity: ramp(p, 0.33, 0.51, 0, 1),
-    frameWidthPx: ramp(p, 0.33, 0.53, 0, 18),
+    frameWidthPx: ramp(p, 0.33, 0.53, 0, FRAME_WIDTH_PX),
     labelOpacity: ramp(p, 0.42, 0.7, 0, 1),
   }
 }

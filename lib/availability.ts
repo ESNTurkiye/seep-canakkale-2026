@@ -45,3 +45,16 @@ export function videoAvailable(src: string): boolean {
 export function realPhotoAvailable(src: string): boolean {
   return fs.existsSync(path.join(process.cwd(), 'public', realPhotoSrc(src)))
 }
+
+/**
+ * Whether the gilt frame assets have landed (issue #12). Both are needed
+ * together: a wall carrying a carved landscape frame and a gradient portrait
+ * frame reads as a mistake, where two gradient frames read as a style. With
+ * either missing, every frame falls back to the CSS gradient border, which
+ * is what the site shipped with and still looks deliberate.
+ */
+export function frameAvailable(): boolean {
+  return ['landscape', 'portrait'].every((name) =>
+    fs.existsSync(path.join(process.cwd(), 'public', 'frames', `${name}.png`)),
+  )
+}

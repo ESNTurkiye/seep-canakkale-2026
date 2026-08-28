@@ -1,5 +1,5 @@
 import { scenes } from '@/content/scenes'
-import { imageAvailability, videoAvailable, realPhotoAvailable } from '@/lib/availability'
+import { imageAvailability, videoAvailable, realPhotoAvailable, frameAvailable } from '@/lib/availability'
 import { OpeningScene } from '@/components/OpeningScene'
 import { EnteringScene } from '@/components/EnteringScene'
 import { ClosingScene } from '@/components/ClosingScene'
@@ -11,8 +11,10 @@ export default function Home() {
     scenes.flatMap((scene) => scene.artworks.map((artwork) => [artwork.src, realPhotoAvailable(artwork.src)])),
   )
 
+  // One flag for the whole page rather than per painting: every frame on the
+  // site switches together or not at all (issue #12).
   return (
-    <main>
+    <main data-frames={frameAvailable() ? '' : undefined}>
       {scenes.map((scene) => {
         switch (scene.kind) {
           case 'opening':
