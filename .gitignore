@@ -22,3 +22,7 @@ assets/artwork-masters/
 # Cached Overpass response for scripts/derive-strait.mjs — a download, not a source.
 .cache/
 
+# Venue photographs are inputs, not outputs — the site serves the cropped
+# 16:9 derivatives in public/artwork/. Unlike an artwork master these cannot be
+# regenerated from a prompt; see scripts/derive-venue-photos.mjs.
+assets/venue-photos/

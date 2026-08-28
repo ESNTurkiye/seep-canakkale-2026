@@ -206,6 +206,38 @@ A hung painting can carry a real photograph behind it, gated on file presence ex
 - **Landscape 16:9, at least 2000px wide.** Anything portrait or square gets cropped by `object-fit: cover` and the crop will not be the one you wanted.
 - **Empty rooms.** No recognisable faces: nobody in these photographs has consented the way the sixteen in `docs/adr/0002-ai-generated-oc-portraits.md` did.
 
+`scripts/derive-venue-photos.mjs` (`npm run venues`) does the cropping, and records
+the crop for each photograph in code rather than leaving it as something someone
+did once in a shell. Originals live in `assets/venue-photos/`, gitignored for the
+same reason masters are (ADR-0007) with one difference worth knowing: **a master can
+be regenerated from a prompt and these cannot.** That directory is the only copy.
+
+### What has landed, and what is still thin
+
+All eight arrived and are live. Six are under the 2000px the paintings ship at, and
+were **not** enlarged — an upscale would only make the softness look like a mistake
+rather than a limit. They read acceptably at the size a painting hangs on a two-up
+wall; they will not survive that wall getting wider. Ask for larger originals when
+the section can get them, in this order:
+
+| File | Source | Note |
+|---|---|---|
+| `venues-ariadne-thread-real.jpg` | 615 × 375 | Worst of the eight — barely a third of target. Replace first. |
+| `venues-homer-recital-real.jpg` | 900 × 600 | Half target. |
+| `evenings-turkish-night-real.jpg` | 1170 × 1560 | Portrait; cropping to 16:9 spends most of it. |
+| `evenings-intercultural-real.jpg` | 1360 × 765 | Already 16:9, just small. |
+| `stay-kule-beacon-real.jpg` | 1360 × 907 | |
+| `stay-xenia-real.jpg` | 765 × 1020 | Portrait; cropped to the entrance, which is what Xenia paints. |
+| `venues-judgement-of-paris-real.jpg` | 2000 × 1125 | Fine — arrived needing nothing. |
+| `venues-torch-handover-real.jpg` | 2592 × 1728 | Fine. |
+
+**Faces.** Four of these have recognisable people in them — the two ceremony halls,
+the Turkish Night crowd and the Intercultural Night terrace. That is a departure from
+the "empty rooms" rule above, taken knowingly: they came from the section as
+photographs of its own past events. Anyone re-supplying these should confirm they are
+the section's own to publish. The closing-hall photograph also carries another event's
+branding on the screen behind the dais.
+
 ### 4a. `venues-ariadne-thread-real.jpg` — the registration desk behind The Thread
 
 ### 4b. `venues-homer-recital-real.jpg` — the opening-ceremony hall behind The Recital
