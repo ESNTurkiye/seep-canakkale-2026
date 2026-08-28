@@ -850,14 +850,22 @@ describe('realPhotoReveal — before the reveal begins', () => {
     assert.equal(realPhotoReveal(0, false), 0)
   })
 
-  test('the painting is still fully uncovered partway through the track', () => {
-    assert.equal(realPhotoReveal(0.3, false), 0)
+  test('the painting is still fully uncovered as it settles into view', () => {
+    assert.equal(realPhotoReveal(0.05, false), 0)
   })
 })
 
 describe('realPhotoReveal — the reveal', () => {
   test('is fully opaque at the end of the track', () => {
     assert.equal(realPhotoReveal(1, false), 1)
+  })
+
+  // The whole point of the reveal is that somebody watches it happen. The
+  // track ends with the painting above the top edge of the viewport, so a
+  // crossfade still running at the halfway mark is one nobody ever sees —
+  // which is exactly what the original 0.6 threshold did.
+  test('has finished well before the painting leaves the viewport', () => {
+    assert.equal(realPhotoReveal(0.5, false), 1)
   })
 
   test('rises monotonically across the sweep', () => {

@@ -375,10 +375,19 @@ export function handoffLift(progress: number, reducedMotion: boolean): number {
 }
 
 /**
- * Progress (within the reveal's own track — see `realPhotoReveal`) at which
- * a hung painting's real-photo layer starts covering it.
+ * The window (within the reveal's own track — see `realPhotoReveal`) over
+ * which a hung painting's real-photo layer covers it.
+ *
+ * These were one constant at 0.6, which put the whole crossfade past the
+ * point where the painting is still on screen. The track runs from the
+ * painting's top reaching the viewport's centre to its bottom reaching the
+ * viewport's top, so on a two-up wall — the painting about 44svh tall — 0.6
+ * lands with the painting already above the top edge. The reveal was firing
+ * where nobody could watch it. It now completes while the painting is at its
+ * most visible and holds there for the rest of the pass.
  */
-const realPhotoRevealStart = 0.6
+const realPhotoRevealStart = 0.12
+const realPhotoRevealEnd = 0.42
 
 /**
  * Opacity of the real-photograph layer that covers a hung, non-cinematic
@@ -399,5 +408,5 @@ const realPhotoRevealStart = 0.6
  */
 export function realPhotoReveal(progress: number, reducedMotion: boolean): number {
   if (reducedMotion) return 0
-  return ramp(clamp01(progress), realPhotoRevealStart, 1, 0, 1)
+  return ramp(clamp01(progress), realPhotoRevealStart, realPhotoRevealEnd, 0, 1)
 }
