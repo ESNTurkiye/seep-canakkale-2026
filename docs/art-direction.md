@@ -4,11 +4,53 @@ Every image on this site is generated. This file is the source of truth for how:
 
 ## Masters vs. committed assets
 
-Scene artwork is generated at a large master resolution (5504 × 3072), then downsized to a ~2000px web variant. Only the web variant is committed, to `public/artwork/`. The master is not committed — see `docs/adr/0007-masters-out-of-git.md` — it lives in `assets/artwork-masters/`, which is gitignored. Frames have no separate master: they're generated once directly at their final ~2000px size, straight into `public/frames/`.
+Scene artwork is generated at a large master resolution, then downsized to a ~2000px web variant. Only the web variant is committed, to `public/artwork/`. The master is not committed — see `docs/adr/0007-masters-out-of-git.md` — it lives in `assets/artwork-masters/`, which is gitignored. Frames have no separate master: they're generated once directly at their final ~2000px size, straight into `public/frames/`.
+
+Masters come in at 5504 × 3072, which is 1.79:1 rather than a true 16:9 — that is what the model returns for a 16:9 request at 4K, and it is what the first nine came in at too, so old and new masters are the same size. Well above the 3000px floor rule 2 sets.
 
 **TODO: masters need a shared archive location, not just one contributor's laptop. Not decided yet — name it here once it exists.**
 
-Target model: Nano Banana Pro (Gemini 3 Pro Image) via Higgsfield. Any model that preserves identity from a reference photograph works for the portraits; the scene artworks are model-agnostic.
+Target model: Nano Banana Pro (Gemini 3 Pro Image), used directly in Google AI Studio — see "Producing an image in Google AI Studio" below. The first nine artworks and the two frames were made through Higgsfield, which is no longer available to us; it was only ever a front end for this same model, so not one prompt in this file changes. Any model that preserves identity from a reference photograph works for the portraits; the scene artworks are model-agnostic.
+
+## Producing an image in Google AI Studio
+
+Everything is done by hand at [aistudio.google.com](https://aistudio.google.com), on the **Gemini 3 Pro Image** model — that is Nano Banana Pro's product name. The prompts in this file are the entire input; paste one unchanged.
+
+### Account and billing
+
+AI Studio must be pointed at a Google Cloud project with a billing account attached, and generation happens on the **paid tier**. This is not optional and not only about money:
+
+- 4K output and Veo are not available on the free tier at all.
+- The free tier may use what you send it to improve Google's products; the paid tier does not. Sixteen Organising Committee members' photographs go through this pipeline under the consent recorded in `docs/adr/0002-ai-generated-oc-portraits.md`. Paid tier is the tier that consent was given for.
+
+Funding comes from Google Developer Program Premium monthly Gen AI credits, which accrue on the billing account and expire a year after each is issued. The whole remaining asset backlog costs a small fraction of one year's accrual — images are cents, and Veo is the only line that moves.
+
+**A credit is not a spending cap.** When it runs out the billing account keeps charging the card, silently. Set a monthly budget and an alert under Billing → Budgets & alerts before the first generation, not after.
+
+| | Aspect ratio | Resolution | Reference image |
+|---|---|---|---|
+| Scene artwork | 16:9 | 4K | none |
+| Frames | 16:9 / 4:5 | 2K | none |
+| Portrait | 4:5 | 2K | the member's source photograph |
+
+- **Aspect ratio and resolution are controls in the panel, not prompt text.** Set them there. The shared style block below ends with "16:9" — leave it: the nine existing artworks were generated with that exact string and the set's consistency outranks tidiness. But never *add* "4K" or "3840 × 2160" to a prompt.
+- **2K is right for portraits and frames.** 2K is already four times the 800 × 1000 a portrait is committed at, and twice the ~2000px a frame ships at. 4K buys nothing there and generates more slowly.
+- If a Google Search grounding toggle is offered, leave it off. It exists for factual graphics and data visualisation; on a Bouguereau pastiche it drags the image towards photographic reference.
+- Every image AI Studio returns carries an invisible SynthID watermark. This is fine — the site does not claim these are photographs — but it means the artwork is detectable as generated, which the OC should know before approving a portrait.
+
+### Deriving the web variant by hand
+
+`package.json` has `npm run art`, pointing at `scripts/derive-artwork.mjs` — that file is not in this repository and not in its history, so the command does not run. Until it exists, downsize with ffmpeg:
+
+```
+# scene artwork: master -> the committed 2000px JPEG
+ffmpeg -i assets/artwork-masters/<name>.png -vf scale=2000:-2 -q:v 3 public/artwork/<name>.jpg
+
+# portrait: AI Studio download -> the committed 800px PNG
+ffmpeg -i <download>.png -vf scale=800:-2 public/portraits/<slug>.png
+```
+
+Keep the scene master in `assets/artwork-masters/` under the same base name as the committed file. It is gitignored, which is not the same as disposable.
 
 ## Rules that apply to every image
 
@@ -23,9 +65,14 @@ Target model: Nano Banana Pro (Gemini 3 Pro Image) via Higgsfield. Any model tha
 
 Prepend this to every scene prompt:
 
-> A museum-quality Neoclassical oil painting inspired by High Renaissance composition and 19th-century Academic Realism, in the style of William-Adolphe Bouguereau, Frederic Leighton, Lawrence Alma-Tadema and Jean-Léon Gérôme. Elegant figures with flowing drapery, idealised anatomy, luminous skin, rich oil paint textures, harmonious composition, dramatic clouds, the Dardanelles strait and Aegean landscape, timeless classical beauty, subtly blended with surreal contemporary elements. Late-afternoon light from the left. Palette of Aegean blue, marble white, olive green, terracotta and warm grey. No text anywhere in the image. 16:9.
+> A museum-quality Neoclassical oil painting inspired by High Renaissance composition and 19th-century Academic Realism, in the style of William-Adolphe Bouguereau, Frederic Leighton, Lawrence Alma-Tadema and Jean-Léon Gérôme. Elegant figures with flowing drapery, idealised anatomy, luminous skin, rich oil paint textures, harmonious composition, dramatic clouds, the Dardanelles strait and Aegean landscape, timeless classical beauty, subtly blended with surreal contemporary elements. Late-afternoon light from the left. Restrained, muted tonality with soft atmospheric haze — not vivid, not high-contrast. Palette of Aegean blue, marble white, olive green, terracotta and warm grey. The only contemporary object in the painting is the one this scene names; every ship, building and garment other than that object is ancient. No text, no signature, and no painted frame or border anywhere in the image. 16:9.
+
+Two clauses in that block were added after the first nine were generated, because rule 4 and rule 5 were written down here but never actually reached the model — only this block and the scene paragraph are sent. The muted-tonality clause holds the set to one palette; the one-object clause stops a second anachronism drifting in, which is how a modern freighter turned up on the horizon of a beacon scene. The first nine were generated without them and are not to be regenerated.
 
 ## Scene artwork
+
+`scripts/generate.mjs` reads the prompts below straight out of this file, so the structure matters: **the first paragraph under a scene heading is the prompt, verbatim.** Anything addressed to a human — rationale, warnings, comparisons between scenes — goes in a later paragraph, or the model reads it as instruction.
+
 
 ### 1. `opening-trojan-horse.jpg` — Opening
 
@@ -39,13 +86,27 @@ The great wooden horse of Troy standing before the city walls at first light, it
 
 A young man swimming across a narrow moonlit-into-dawn strait towards a marble tower on the far shore, where a woman leans from the parapet holding up a light to guide him — the light is a smartphone torch, held exactly the way a person holds a phone. Both continents visible, the water narrow enough to feel crossable. Wide landscape; the swimmer small, the strait dominant. Lower-left is open water.
 
-### 4a. `venues-homer-recital.jpg` — Daytime venues, plenary
+### 4a. `venues-ariadne-thread.jpg` — Daytime venues, registration
+
+Ariadne standing at the threshold of a colonnaded hall, pressing a ball of crimson thread into the open hand of an arriving traveller in drapery; more travellers wait their turn in a switchback queue held by modern retractable-belt barrier posts, the dark tape drawn taut between them. At a marble side table a seated scribe keeps the roll on a long scroll. Late-afternoon light through the columns, the strait beyond. Threshold and queue occupy the right two-thirds; lower-left is open marble floor.
+
+_Not part of the prompt: the thread is the badge — what a delegate is handed at the door so the days ahead can be navigated. It plants the labyrinth two frames before The Choice pays it off, so the crimson must be the eye's first stop. The barrier posts are the scene's one contemporary object; do not let a second one in._
+
+### 4b. `venues-homer-recital.jpg` — Daytime venues, opening ceremony
 
 Blind Homer standing on a low marble dais, mid-recital, one hand raised, before a packed semicircle of seated listeners in drapery who lean forward. Beside him a scribe sits cross-legged transcribing — on an open silver laptop resting on his knees. Amphitheatre setting, columns behind, sea visible through the gap. Lower-left corner is empty marble floor.
 
-### 4b. `venues-judgement-of-paris.jpg` — Daytime venues, parallel sessions
+_Not part of the prompt: this was generated as "the plenary" and now carries the opening ceremony as well — the room is the same room. Not to be regenerated; the prompt is recorded here as it was sent._
+
+### 4c. `venues-judgement-of-paris.jpg` — Daytime venues, parallel sessions
 
 The Judgement of Paris: a young shepherd seated on a rock holding a single golden apple, facing three goddesses standing in a row before three separate doorways, each doorway leading into a different bright interior. He is visibly unable to choose. The three goddesses occupy the right; the apple catches the light. Lower-left is open hillside.
+
+### 4d. `venues-torch-handover.jpg` — Daytime venues, closing ceremony
+
+The passing of the flame at the end of the games: on a low dais at the far end of a great marble hall, a figure in drapery holds out a burning torch while another reaches to take it, the flame caught mid-transfer between their hands. Before them a seated assembly in drapery fills the hall, all turned to watch. A slender chrome microphone stand rises beside the dais. The hall opens at its far end onto the strait at dusk, ships lying at anchor. Dais and assembly occupy the right two-thirds; lower-left is empty marble floor.
+
+_Not part of the prompt: a closing ceremony is a handover — the platform goes to next year's host — which is why the flame is mid-transfer rather than held aloft. The microphone stand is the one contemporary object. Deliberately not the phones, lanyards or suitcases other scenes already spend; the set reads as one collection partly because no anachronism is used twice._
 
 ### 5. `coffee-achilles.jpg` — Coffee breaks
 
@@ -65,7 +126,9 @@ The Homeric rite of guest-friendship: a host kneeling at the threshold of a colo
 
 ### 7b. `stay-kule-beacon.jpg` — Where you'll stay, Kule Otel
 
-Hestia's kept flame, high above the strait: a keeper standing at the top of a stone tower, tending a great hearth-brazier that burns as a beacon over the darkening water, guiding travellers home. The view is from beside the keeper, looking out over the tower's edge rather than up from the shore — a different vantage from Scene 3's crossing. A modern hard-shell rolling suitcase rests at the foot of the tower, below the keeper, handle extended. Figure and brazier upper-right; lower-left is open sky and sea.
+Hestia's kept flame, high above the strait: a keeper standing at the top of a stone tower, tending a great hearth-brazier that burns as a beacon over the darkening water, guiding travellers home. The view is from beside the keeper, looking out over the tower's edge rather than up from the shore. A modern hard-shell rolling suitcase rests at the foot of the tower, below the keeper, handle extended. Figure and brazier upper-right; lower-left is open sky and sea.
+
+_Not part of the prompt: that vantage deliberately differs from Scene 3, which sees a tower from the water. The two must not read as the same view twice._
 
 ### 8. Scene 8 uses portraits, not scene artwork
 
@@ -104,6 +167,27 @@ Shared rules for every loop, regardless of scene:
 - Deliver `<base>.mp4` and `<base>.webm` into `public/artwork/`, next to the still under the same base name. The still stays as poster and fallback.
 - If the loop is not seamless, we ship the still. A visible jump is worse than no motion.
 
+### Producing a loop in Google AI Studio
+
+Use **Veo 3.1**, in the same AI Studio project. Seamlessness is the hard part — a freely generated clip almost never lands back on its opening frame, and a loop that does not is not shipped. Veo 3.1 accepts a first frame *and* a last frame, so hand it the same file twice:
+
+- **First frame**: the finished still, e.g. `public/artwork/opening-trojan-horse.jpg`.
+- **Last frame**: that same file again. The clip is then obliged to return to where it began, which is exactly the rule above rather than a lucky take.
+- **Prompt**: only what moves, one sentence, taken from the per-scene note below. Do not re-describe the painting — the two frames already carry it.
+- **Duration**: 4 seconds.
+- **Audio**: the site has no sound. Whatever Veo generates is stripped in the encode.
+
+Veo tops out at 1080p, so a loop is 1920 × 1080 against a 2000 × 1116 still. `object-fit: cover` absorbs that; do not upscale the video to match the still.
+
+Encode both files from the download:
+
+```
+ffmpeg -i <veo>.mp4 -an -c:v libx264 -crf 23 -pix_fmt yuv420p -movflags +faststart public/artwork/<name>.mp4
+ffmpeg -i <veo>.mp4 -an -c:v libvpx-vp9 -crf 34 -b:v 0 public/artwork/<name>.webm
+```
+
+Then watch the join, several times round, before committing. If the last frame does not truly meet the first, the still ships instead.
+
 ### The opening — `opening-trojan-horse`
 
 - What moves: clouds drifting, dust in the air, drapery shifting, one delegate still stepping down the ladder. Nothing else. The painting should look alive, not animated.
@@ -114,14 +198,53 @@ Shared rules for every loop, regardless of scene:
 
 ## Real photographs — the venue reveal (issue #20)
 
-A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, `diptych` or single `artwork`, not just the scenes below — but only these six are wanted live right now.
+A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, a `wall` of any count or a single `artwork`, not just the scenes below — but only these eight are wanted live right now.
 
 - **Filename**: `<same-basename>-real.jpg`, next to the painting's still under `public/artwork/`. No other code change required once the file lands.
 - **Source**: an actual photograph of the real venue, not generated art — this is where the site follows through on showing the venues themselves, not just the myth.
+- **Framing is the whole job.** The photograph replaces the painting inside the same frame, by crossfade, at the same size. Shoot it from a vantage that matches the painting's: the same orientation, the same distance, the subject in the same part of the frame. A photograph framed differently from the painting it covers reads as a cut, not a reveal, and no amount of retouching fixes that afterwards.
+- **Landscape 16:9, at least 2000px wide.** Anything portrait or square gets cropped by `object-fit: cover` and the crop will not be the one you wanted.
+- **Empty rooms.** No recognisable faces: nobody in these photographs has consented the way the sixteen in `docs/adr/0002-ai-generated-oc-portraits.md` did.
 
-### 4a. `venues-homer-recital-real.jpg` — the plenary venue behind The Recital
+`scripts/derive-venue-photos.mjs` (`npm run venues`) does the cropping, and records
+the crop for each photograph in code rather than leaving it as something someone
+did once in a shell. Originals live in `assets/venue-photos/`, gitignored for the
+same reason masters are (ADR-0007) with one difference worth knowing: **a master can
+be regenerated from a prompt and these cannot.** That directory is the only copy.
 
-### 4b. `venues-judgement-of-paris-real.jpg` — the parallel-session venue behind The Choice
+### What has landed, and what is still thin
+
+All eight arrived and are live. Six are under the 2000px the paintings ship at, and
+were **not** enlarged — an upscale would only make the softness look like a mistake
+rather than a limit. They read acceptably at the size a painting hangs on a two-up
+wall; they will not survive that wall getting wider. Ask for larger originals when
+the section can get them, in this order:
+
+| File | Source | Note |
+|---|---|---|
+| `venues-ariadne-thread-real.jpg` | 615 × 375 | Worst of the eight — barely a third of target. Replace first. |
+| `venues-homer-recital-real.jpg` | 900 × 600 | Half target. |
+| `evenings-turkish-night-real.jpg` | 1170 × 1560 | Portrait; cropping to 16:9 spends most of it. |
+| `evenings-intercultural-real.jpg` | 1360 × 765 | Already 16:9, just small. |
+| `stay-kule-beacon-real.jpg` | 1360 × 907 | |
+| `stay-xenia-real.jpg` | 765 × 1020 | Portrait; cropped to the entrance, which is what Xenia paints. |
+| `venues-judgement-of-paris-real.jpg` | 2000 × 1125 | Fine — arrived needing nothing. |
+| `venues-torch-handover-real.jpg` | 2592 × 1728 | Fine. |
+
+**Faces.** Four of these have recognisable people in them — the two ceremony halls,
+the Turkish Night crowd and the Intercultural Night terrace. That is a departure from
+the "empty rooms" rule above, taken knowingly: they came from the section as
+photographs of its own past events. Anyone re-supplying these should confirm they are
+the section's own to publish. The closing-hall photograph also carries another event's
+branding on the screen behind the dais.
+
+### 4a. `venues-ariadne-thread-real.jpg` — the registration desk behind The Thread
+
+### 4b. `venues-homer-recital-real.jpg` — the opening-ceremony hall behind The Recital
+
+### 4c. `venues-judgement-of-paris-real.jpg` — the parallel-session rooms behind The Choice
+
+### 4d. `venues-torch-handover-real.jpg` — the closing-ceremony hall behind The Handover
 
 ### 6a. `evenings-intercultural-real.jpg` — the Intercultural Night venue behind The Table
 
@@ -157,6 +280,24 @@ One template, unchanged for all sixteen. Only the reference photograph changes.
 > Head-and-shoulders portrait in the style of a 19th-century Academic Realist oil painting — Bouguereau and Alma-Tadema — painted on canvas with visible brushwork and a warm varnish. **Preserve the face from the reference photograph exactly: the same bone structure, the same nose, the same eyes, the same mouth, the same skin tone, the same hair. Do not idealise, do not beautify, do not slim, do not change the age.** Restyle only what surrounds the face: classical drapery over one shoulder, bare neck, no modern clothing. Plain warm-grey painted background with a soft vignette. Even light from the left. Palette of warm grey, terracotta and olive. No text. 4:5 portrait.
 
 The bolded sentence exists because the shared style block asks for "idealised anatomy, luminous skin" — exactly what destroys a likeness. The portrait template deliberately contradicts it. Do not merge the two blocks.
+
+### Per-portrait corrections
+
+`scripts/generate.mjs portrait <slug> --note "…"` appends one sentence to the template. The template itself is never edited: identical wording across all sixteen is what makes them read as one wall rather than sixteen separately-negotiated paintings.
+
+A note is for where the photograph misleads about the person, and the two that exist earn their place:
+
+- **`furkan-ucar`** — his photograph is taken in a cap, so the model had nothing above the eyebrows and invented ginger hair and a full beard. The note says he is bald.
+- **`burcu-ozdemir`** — the note fixes her pose, not her face; see "A finished portrait can be the reference" below. Six attempts from four different photographs all lost either the expression or the hair, and the one everybody preferred turned out to be the very first, which only needed straightening.
+- **`merve-ceylan`** — the note is about light and finish, not features: _"Light and finish her the way a portrait painter flatters a sitter: a soft warm key from the left with gentle fill and no harsh shadow, luminous skin, a delicate blended finish, and a warm glow through the cheeks and lips — while keeping the bone structure, the features, their proportions and every mark of the face precisely as the reference shows them."_ Chosen from seven photographs painted twice over, once plain and once with this note.
+
+  **What that experiment showed, and it is the reason this note is worth reading before writing another one.** The same seven photographs, painted with the note, came back as seven near-identical faces: the same nose, the same mouth, the same rosy cheeks. Without it they stayed seven distinguishable people, each tracking its own photograph. One of the seven also turned her hair red. The template's "do not idealise, do not beautify" is not squeamishness — asking this model to flatter a face makes it drift towards a face it already knows how to paint, and the likeness is what pays. The note survived here because one of the seven kept her, not because the note improved six of them. If you write another like it, paint both ways and compare before choosing.
+
+**A finished portrait can be the reference.** Where a painting has the likeness but the sitter is turned, tilted or off-centre, hand that painting back in as the reference and let the note change only the pose: face the viewer square on, head level, shoulders even, centred. The likeness survives because it is no longer being derived a second time — it is being carried. This is how `burcu-ozdemir` reached the wall: her original portrait was the warmest of six attempts and the only one anybody preferred, but she sat tilted and turned while the other fifteen sit straight. Repainting from photographs kept costing the expression; reposing the painting cost nothing.
+
+A note steers a painting back towards the person. It is not a licence to change someone into somebody else, and it never removes the approval in `docs/adr/0002-ai-generated-oc-portraits.md` — the member sees the finished portrait and says yes, note or no note.
+
+In AI Studio, attach the source photograph to the prompt and set the aspect ratio to 4:5. **Start a fresh chat for each member.** In a continuing chat the previous member's photograph and portrait stay in context, and the next face comes back contaminated by them — which is the one failure a wall of sixteen makes obvious.
 
 ### Filenames
 

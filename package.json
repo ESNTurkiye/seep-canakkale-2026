@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test",
     "verify": "npm run typecheck && npm run test && npm run build",
-    "art": "node scripts/derive-artwork.mjs"
+    "art": "node scripts/derive-artwork.mjs",
+    "strait": "node scripts/derive-strait.mjs",
+    "venues": "node scripts/derive-venue-photos.mjs"
   },
   "dependencies": {
     "motion": "^12.23.12",

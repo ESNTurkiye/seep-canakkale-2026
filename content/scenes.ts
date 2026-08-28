@@ -6,18 +6,35 @@
  * exists. See docs/art-direction.md for the prompt behind each filename.
  */
 
+import { event } from './event.ts'
+
 export type Artwork = {
   src: string
   /** Shown on the museum label, in italics, as a painting title. */
   title: string
   /** The myth being borrowed. Shown on the label beneath the title. */
   myth: string
+  /**
+   * The real place, named plainly at the foot of the label. The title and the
+   * myth say what the painting *is*; a delegate reading the wall also wants to
+   * know which room they are being shown. Set it on any painting of somewhere
+   * that exists — which is the same set that reveals a photograph as you scroll
+   * past (issue #19) — and leave it off anything else: the coffee break is a
+   * habit, not a room, and the cinematic scenes are places in the myth.
+   */
+  venue?: string
   alt: string
 }
 
 export type Scene = {
   id: string
-  kind: 'opening' | 'typographic' | 'artwork' | 'diptych' | 'portraits' | 'closing'
+  /**
+   * `wall` is any number of paintings hung together on one wall — it was
+   * `diptych` while every such wall held exactly two, which stopped being true
+   * when the venues wall grew to four. The count is a content decision; the
+   * kind only says "these hang, they are not choreographed".
+   */
+  kind: 'opening' | 'typographic' | 'artwork' | 'wall' | 'portraits' | 'closing'
   eyebrow?: string
   headline: string
   body: string
@@ -26,12 +43,22 @@ export type Scene = {
    * Full scroll choreography (grows to fill the viewport, recedes as it is
    * passed) vs. light movement only — a content decision, not a technical
    * one. See docs/adr/0005-scroll-choreography.md. Only meaningful on a
-   * single-artwork `artwork`/`diptych` scene — the opening and closing are
+   * single-artwork `artwork`/`wall` scene — the opening and closing are
    * always fully choreographed by virtue of their kind (the closing via its
    * own dedicated `ClosingScene`, issue #18), and typographic and portrait
    * scenes have no single painting to choreograph.
    */
   cinematic?: boolean
+  /**
+   * A line chart hung on a typographic wall in place of a painting. Which wall
+   * carries one is a content decision, like `cinematic` — but unlike a
+   * painting, a chart is only worth its space when it *shows* what the
+   * headline claims. `'strait'` draws the Dardanelles from real coastline
+   * geometry and marks the narrowest crossing, which is the whole of the
+   * "This Year" headline. See `content/strait.ts` and
+   * `scripts/derive-strait.mjs`.
+   */
+  chart?: 'strait'
   /**
    * Whether a cinematic scene recedes back to its hung size after reaching
    * peak (the default, `true` — a gallery walk-past). Set to `false` for a
@@ -65,6 +92,7 @@ export const scenes: Scene[] = [
     eyebrow: 'This year',
     headline: 'The largest of the five platforms is coming to the narrowest water in Europe.',
     body: 'Fifteen member countries. Once a year. Hosted by ESN Çanakkale.',
+    chart: 'strait',
     artworks: [],
   },
   {
@@ -86,29 +114,48 @@ export const scenes: Scene[] = [
   },
   {
     id: 'daytime',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Daytime',
     headline: 'Knowledge has always been shared out loud.',
-    body: 'Three programme days. Each one opens with a plenary and breaks into parallel sessions — which is where the trouble starts.',
+    // Four rooms, hung in the order a delegate meets them: register, be
+    // welcomed, choose between sessions, be handed on. The days are Thursday
+    // to Sunday — see content/event.ts, which is where the count comes from.
+    body: 'Four days, Thursday to Sunday. Four rooms, in the order you will meet them.',
     artworks: [
+      {
+        src: '/artwork/venues-ariadne-thread.jpg',
+        title: 'The Thread',
+        myth: "after Ariadne's clew",
+        venue: 'Registration',
+        alt: 'Ariadne at a colonnaded threshold pressing a ball of crimson thread into an arriving traveller\u2019s hand, a queue waiting behind a retractable-belt barrier.',
+      },
       {
         src: '/artwork/venues-homer-recital.jpg',
         title: 'The Recital',
         myth: 'after Homer',
+        venue: 'Opening Hall',
         alt: 'Blind Homer reciting on a marble dais to a seated audience, while a scribe transcribes on a laptop.',
       },
       {
         src: '/artwork/venues-judgement-of-paris.jpg',
         title: 'The Choice',
         myth: 'after the Judgement of Paris',
+        venue: 'Parallel Sessions',
         alt: 'A shepherd holding a golden apple, unable to choose between three goddesses standing before three doorways.',
+      },
+      {
+        src: '/artwork/venues-torch-handover.jpg',
+        title: 'The Handover',
+        myth: 'after the passing of the flame',
+        venue: 'Closing Hall',
+        alt: 'A burning torch passing from one hand to another on a dais before a seated assembly, a chrome microphone stand beside them.',
       },
     ],
   },
   {
     id: 'coffee',
     kind: 'artwork',
-    eyebrow: 'Twice a day',
+    eyebrow: 'Twice a day, maybe more',
     headline: 'Everyone has a weak spot.',
     body: 'Ours arrives on a brass tray: tea in tulip glasses, Turkish coffee, and peynir helvası you will look up on the way home.',
     artworks: [
@@ -122,7 +169,7 @@ export const scenes: Scene[] = [
   },
   {
     id: 'evenings',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Evenings',
     headline: 'Resistance is traditional.',
     body: 'Intercultural Night, where fifteen countries put their food on one table. Turkish Night, where the host section returns the favour.',
@@ -131,33 +178,37 @@ export const scenes: Scene[] = [
         src: '/artwork/evenings-intercultural.jpg',
         title: 'The Table',
         myth: 'after the Sirens',
+        venue: 'Intercultural Night',
         alt: 'A long marble banquet table above the sea at dusk, figures from many lands passing dishes, two sirens singing unheeded from a balustrade.',
       },
       {
         src: '/artwork/evenings-turkish-night.jpg',
         title: 'The Circle',
         myth: 'after the Anatolian round dance',
+        venue: 'Turkish Night',
         alt: 'Figures in classical drapery dancing in a linked circle on a marble terrace at night, a lute player and a tray of tea glasses beside them.',
       },
     ],
   },
   {
     id: 'stay',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Where you will stay',
     headline: 'Hospitality was a sacred duty here long before it was an industry.',
-    body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. The Greeks had a word for the rest of it.',
+    body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. You will be looked after better than you asked to be.',
     artworks: [
       {
         src: '/artwork/stay-xenia.jpg',
         title: 'Xenia',
         myth: 'after the Homeric rite of guest-friendship',
+        venue: 'Temizay Otel',
         alt: 'A host kneeling to wash the feet of an arriving traveller at a colonnaded threshold, a modern rolling suitcase standing beside them.',
       },
       {
         src: '/artwork/stay-kule-beacon.jpg',
         title: 'The Beacon',
         myth: "after Hestia's kept flame",
+        venue: 'Kule Otel',
         alt: "A keeper standing at the top of a stone tower, tending a hearth-brazier that burns as a beacon over the darkening strait, a modern rolling suitcase resting at the tower's foot.",
       },
     ],
@@ -174,8 +225,8 @@ export const scenes: Scene[] = [
     id: 'closing',
     kind: 'closing',
     eyebrow: 'Applications',
-    headline: 'We did warn you.',
-    body: 'Places are allocated to sections, and there are never enough of them. Nobody believed her either.',
+    headline: `Applications close on ${event.applicationCloseLabel}.`,
+    body: `Open ${event.applicationWindowLabel}. Cassandra was right as well, and nobody moved until it was too late.`,
     artworks: [
       {
         src: '/artwork/closing-cassandra.jpg',
@@ -201,6 +252,13 @@ for (const scene of scenes) {
       `Scene "${scene.id}" sets \`cinematic\` but is kind "${scene.kind}" — that kind is always fully ` +
         `choreographed via its own dedicated component, so \`cinematic\` is meaningless (and ignored by ` +
         `app/page.tsx's dispatch) there.`,
+    )
+  }
+  if (scene.chart && scene.kind !== 'typographic') {
+    throw new Error(
+      `Scene "${scene.id}" sets \`chart\` but is kind "${scene.kind}" — only a typographic wall ` +
+        `renders one; every other kind hangs paintings, and StatementScene is the only component ` +
+        `that reads \`chart\`.`,
     )
   }
   if (scene.recede !== undefined && !scene.cinematic) {

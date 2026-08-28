@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import type { Scene } from '@/content/scenes'
-import { enteringChoreography, enteringInkStart, inkCrossfadeOpacity } from '@/lib/choreography'
+import { approachPeak, enteringChoreography, enteringInkStart, inkCrossfadeOpacity, handoffLift } from '@/lib/choreography'
 import { useResolvedReducedMotion } from '@/lib/useResolvedReducedMotion'
 import { Painting } from './Painting'
 import { InkCrossfade } from './InkCrossfade'
@@ -46,16 +46,19 @@ export function EnteringScene({
    * viewport centre, so covering the viewport means covering that much more
    * on the bottom edge too.
    *
-   * Receding scenes stay capped: on a tall narrow phone the resting box is
-   * short relative to the viewport height, and covering both edges uncapped
-   * would zoom the 16:9 artwork to a sliver rather than a painting filling
-   * the view — acceptable there since the painting recedes again straight
+   * Receding scenes stay capped: a very tall viewport can ask for a zoom no
+   * walk-past needs, and the painting is on its way back out again straight
    * away. A non-receding scene (issue #17) instead holds at peak and hands
-   * off via the ink crossfade, so it must actually reach full bleed the way
-   * OpeningScene's uncapped, overshooting `cover * 1.06` does — capping it
-   * would leave a permanent, held band of gallery wall (mitigated by the
-   * wallOpacity fade below, but the painting itself should still cover what
-   * it can).
+   * off via the ink crossfade, so it must actually reach full bleed —
+   * uncapped, and overshooting a flush fit the way OpeningScene does, since
+   * anything short of that leaves a permanent, held band of gallery wall
+   * (mitigated by the wallOpacity fade below, but the painting itself should
+   * still cover what it can).
+   *
+   * On a screen too tall to cover without throwing most of the painting away
+   * — a phone held upright — neither of those applies: `approachPeak` fits
+   * the painting whole across the width instead, and the wall (or, on the
+   * non-receding path, the ink it fades to) stays above and below it.
    */
   const [peak, setPeak] = useState(1.9)
 
@@ -64,10 +67,17 @@ export function EnteringScene({
       const el = boxRef.current
       if (!el || !el.offsetWidth || !el.offsetHeight) return
       const below = el.parentElement ? el.parentElement.offsetHeight - el.offsetHeight : 0
-      const widthCover = window.innerWidth / el.offsetWidth
-      const heightCover = (window.innerHeight + below) / el.offsetHeight
-      const needed = Math.max(widthCover, heightCover)
-      setPeak(recede ? Math.min(4.5, needed) : needed * 1.06)
+      setPeak(
+        approachPeak({
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+          boxWidth: el.offsetWidth,
+          boxHeight: el.offsetHeight,
+          below,
+          overshoot: recede ? 1 : 1.06,
+          cap: recede ? 4.5 : Infinity,
+        }),
+      )
     }
     measure()
     window.addEventListener('resize', measure)
@@ -112,6 +122,15 @@ export function EnteringScene({
   const copyVisibility = useTransform([copyOpacity, inkOpacity], ([co, io]: number[]) =>
     co > 0.02 && io < 0.98 ? 'visible' : 'hidden',
   )
+  // The handoff's second beat, on the non-receding path only — the same shape
+  // OpeningScene uses, and for the same reason: the stage lifts off the next
+  // wall rather than being scrolled off it. Computed unconditionally to keep
+  // hook order stable; a receding scene never overlaps its successor, so
+  // pinning the value at 1 there leaves it a plain opaque stage.
+  const stageOpacity = useTransform(scrollYProgress, (p) =>
+    handoffLift(p, !!reduced || recede),
+  )
+  const stagePointerEvents = useTransform(stageOpacity, (o: number) => (o < 0.02 ? 'none' : 'auto'))
 
   const artwork = scene.artworks[0]
   const available = availability[artwork.src] ?? false
@@ -121,15 +140,22 @@ export function EnteringScene({
       ref={trackRef}
       className={s.track}
       // A full approach-and-recede round trip costs ~320svh (see ADR-0005).
-      // A non-receding scene only makes the approach, so it borrows the
-      // opening's one-way estimate instead (260svh: roughly half that round
-      // trip plus a tail for the copy to fade in and hold before the ink
-      // crossfade) — an estimate to be remeasured against real content, same
-      // caveat as OpeningScene's track height.
-      style={{ height: trackCollapsed ? '100svh' : recede ? '320svh' : '260svh' }}
+      // A non-receding scene only makes the approach and then hands off, so it
+      // takes the opening's remeasured 220svh and its one-viewport overlap
+      // with the scene below — the handoff is the same two beats there, and
+      // the two are deliberately kept identical (see handoffStart). A
+      // receding scene keeps its full round trip and never overlaps: it hands
+      // off to nothing, it just walks past.
+      style={{
+        height: trackCollapsed ? '100svh' : recede ? '320svh' : '220svh',
+        marginBottom: trackCollapsed || recede ? undefined : '-100svh',
+      }}
       aria-label={scene.headline}
     >
-      <div className={s.stage}>
+      <motion.div
+        className={s.stage}
+        style={{ opacity: stageOpacity, pointerEvents: stagePointerEvents }}
+      >
         <motion.div className={s.wall} style={{ opacity: wallOpacity }} />
 
         <div className={s.canvasWrap}>
@@ -161,7 +187,7 @@ export function EnteringScene({
         {!recede && (
           <InkCrossfade progress={scrollYProgress} start={enteringInkStart} reducedMotion={!!reduced} />
         )}
-      </div>
+      </motion.div>
     </section>
   )
 }
