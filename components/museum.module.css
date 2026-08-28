@@ -461,6 +461,15 @@
 
 /* The portrait wall — sixteen of them. */
 .portraitWall {
+  /* It is a list, semantically, and a browser gives a list 40px of indent and
+     a bullet by default. Nothing else on the site is a list, so nothing here
+     had ever reset one: the whole wall sat 40px right of everything above it,
+     which is a tenth of a phone screen and reads as sixteen paintings hung
+     off-centre. The bullets never showed only because a grid item is not a
+     list item. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: clamp(1rem, 2.5vw, 2rem);
