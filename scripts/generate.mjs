@@ -121,6 +121,15 @@ async function generate({ prompt, aspectRatio, imageSize, reference, attempt = 1
 
 const [kind, name, ...flags] = process.argv.slice(2)
 const force = flags.includes('--force')
+
+// A correction for where the photograph misleads about the person — a cap
+// hiding a shaved head, say. It is appended to the template, never edited
+// into it: the template stays identical for all sixteen, which is what makes
+// them read as one wall. Use it only to steer the painting back towards the
+// person, never to change them; the member approves the result either way
+// (docs/adr/0002-ai-generated-oc-portraits.md).
+const noteAt = flags.indexOf('--note')
+const note = noteAt === -1 ? '' : ` ${flags[noteAt + 1]}`
 const { style, portraitTemplate, scenes } = await loadPrompts()
 
 if (kind === 'scene') {
@@ -149,7 +158,7 @@ if (kind === 'scene') {
   if (!force && (await exists(out))) throw new Error(`${out} exists — pass --force to spend again`)
 
   const { bytes, usage } = await generate({
-    prompt: portraitTemplate,
+    prompt: portraitTemplate + note,
     aspectRatio: '4:5',
     imageSize: '2K',
     reference: await readAsInlineImage(join(dir, photo)),
