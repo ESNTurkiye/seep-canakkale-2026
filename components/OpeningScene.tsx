@@ -155,7 +155,12 @@ export function OpeningScene({
             <div className={s.side}>
               <p>{scene.body}</p>
               {event.applicationUrl ? (
-                <a className={s.cta} href={event.applicationUrl}>
+                <a
+                  className={s.cta}
+                  href={event.applicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Apply as a delegate
                 </a>
               ) : (
