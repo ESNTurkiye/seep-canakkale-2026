@@ -288,7 +288,11 @@
   display: grid;
   align-content: center;
   gap: clamp(2rem, 5vw, 4rem);
-  padding: clamp(4rem, 10vh, 9rem) var(--gutter);
+  /* A gallery wall taller than the viewport has no free space left for
+     `align-content: center` to distribute, so this padding is the only thing
+     holding its first line off the top edge. A handing-off scene now uncovers
+     the wall exactly at its top (see handoffLift), which is where that showed. */
+  padding: clamp(5rem, 14vh, 11rem) var(--gutter) clamp(4rem, 10vh, 9rem);
   background: var(--ink);
 }
 
@@ -314,13 +318,20 @@
 }
 
 @media (min-width: 900px) {
-  .hangTwo {
+  /* Two columns whatever the count: two paintings sit side by side, four
+     fall into two rows of two. A wall of hung paintings is a content
+     decision (see `kind: 'wall'`), so the grid must not assume a number. */
+  .hangWall {
     grid-template-columns: 1fr 1fr;
     align-items: start;
   }
 }
 
 .hung {
+  /* One declaration for the hung frame's thickness: the border below, the
+     9-slice overhang in the frames block, and the label gap that has to clear
+     that overhang all read it, so they cannot drift apart. */
+  --hung-fw: clamp(15px, 2.2vw, 34px);
   width: 100%;
   display: grid;
   gap: 1rem;
@@ -331,7 +342,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  border: clamp(15px, 2.2vw, 34px) solid var(--frame);
+  border: var(--hung-fw) solid var(--frame);
   border-image: linear-gradient(150deg, var(--frame-lit), var(--frame) 35%, #7a5f30 70%, var(--frame-lit)) 1;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   overflow: hidden;
@@ -457,12 +468,19 @@
   box-shadow: none;
 }
 
+/* With the frame hung outside the box it overhangs below it, and a plain 1rem
+   gap left the moulding sitting across the painting's title. The gap has to
+   clear the overhang — the frame's own width, less the lip that overlaps the
+   canvas — before it is a gap at all. */
+:global(main[data-frames]) .hung {
+  gap: calc(1rem + var(--hung-fw) - var(--frame-lip));
+}
+
 :global(main[data-frames]) .hungFrame::after {
   content: '';
   position: absolute;
-  --fw: clamp(15px, 2.2vw, 34px);
-  inset: calc(-1 * var(--fw) + var(--frame-lip));
-  border: var(--fw) solid transparent;
+  inset: calc(-1 * var(--hung-fw) + var(--frame-lip));
+  border: var(--hung-fw) solid transparent;
   border-image: url('/frames/landscape.png') 198 215 211 215 stretch;
   box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.9);
   pointer-events: none;

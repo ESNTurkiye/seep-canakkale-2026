@@ -17,11 +17,11 @@ const VENUE_SRCS = [
 
 describe('venue artworks route through GalleryScene (issue #20)', () => {
   for (const src of VENUE_SRCS) {
-    test(`${src} sits in a non-cinematic 'artwork' or 'diptych' scene`, () => {
+    test(`${src} sits in a non-cinematic 'artwork' or 'wall' scene`, () => {
       const scene = scenes.find((s) => s.artworks.some((a) => a.src === src))
       assert.ok(scene, `no scene contains ${src}`)
       assert.ok(
-        scene.kind === 'artwork' || scene.kind === 'diptych',
+        scene.kind === 'artwork' || scene.kind === 'wall',
         `scene "${scene.id}" has kind "${scene.kind}" — not routed to GalleryScene`,
       )
       assert.ok(!scene.cinematic, `scene "${scene.id}" is cinematic — routed to EnteringScene instead`)

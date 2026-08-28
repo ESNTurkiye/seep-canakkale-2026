@@ -17,7 +17,13 @@ export type Artwork = {
 
 export type Scene = {
   id: string
-  kind: 'opening' | 'typographic' | 'artwork' | 'diptych' | 'portraits' | 'closing'
+  /**
+   * `wall` is any number of paintings hung together on one wall — it was
+   * `diptych` while every such wall held exactly two, which stopped being true
+   * when the venues wall grew to four. The count is a content decision; the
+   * kind only says "these hang, they are not choreographed".
+   */
+  kind: 'opening' | 'typographic' | 'artwork' | 'wall' | 'portraits' | 'closing'
   eyebrow?: string
   headline: string
   body: string
@@ -26,7 +32,7 @@ export type Scene = {
    * Full scroll choreography (grows to fill the viewport, recedes as it is
    * passed) vs. light movement only — a content decision, not a technical
    * one. See docs/adr/0005-scroll-choreography.md. Only meaningful on a
-   * single-artwork `artwork`/`diptych` scene — the opening and closing are
+   * single-artwork `artwork`/`wall` scene — the opening and closing are
    * always fully choreographed by virtue of their kind (the closing via its
    * own dedicated `ClosingScene`, issue #18), and typographic and portrait
    * scenes have no single painting to choreograph.
@@ -97,11 +103,20 @@ export const scenes: Scene[] = [
   },
   {
     id: 'daytime',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Daytime',
     headline: 'Knowledge has always been shared out loud.',
-    body: 'Three programme days. Each one opens with a plenary and breaks into parallel sessions — which is where the trouble starts.',
+    // Four rooms, hung in the order a delegate meets them: register, be
+    // welcomed, choose between sessions, be handed on. The days are Thursday
+    // to Sunday — see content/event.ts, which is where the count comes from.
+    body: 'Four days, Thursday to Sunday. Four rooms, in the order you will meet them.',
     artworks: [
+      {
+        src: '/artwork/venues-ariadne-thread.jpg',
+        title: 'The Thread',
+        myth: "after Ariadne's clew",
+        alt: 'Ariadne at a colonnaded threshold pressing a ball of crimson thread into an arriving traveller\u2019s hand, a queue waiting behind a retractable-belt barrier.',
+      },
       {
         src: '/artwork/venues-homer-recital.jpg',
         title: 'The Recital',
@@ -113,6 +128,12 @@ export const scenes: Scene[] = [
         title: 'The Choice',
         myth: 'after the Judgement of Paris',
         alt: 'A shepherd holding a golden apple, unable to choose between three goddesses standing before three doorways.',
+      },
+      {
+        src: '/artwork/venues-torch-handover.jpg',
+        title: 'The Handover',
+        myth: 'after the passing of the flame',
+        alt: 'A burning torch passing from one hand to another on a dais before a seated assembly, a chrome microphone stand beside them.',
       },
     ],
   },
@@ -133,7 +154,7 @@ export const scenes: Scene[] = [
   },
   {
     id: 'evenings',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Evenings',
     headline: 'Resistance is traditional.',
     body: 'Intercultural Night, where fifteen countries put their food on one table. Turkish Night, where the host section returns the favour.',
@@ -154,7 +175,7 @@ export const scenes: Scene[] = [
   },
   {
     id: 'stay',
-    kind: 'diptych',
+    kind: 'wall',
     eyebrow: 'Where you will stay',
     headline: 'Hospitality was a sacred duty here long before it was an industry.',
     body: 'Two places to sleep, beds and breakfast in both, a short walk to everything. The Greeks had a word for the rest of it.',

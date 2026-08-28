@@ -86,13 +86,27 @@ The great wooden horse of Troy standing before the city walls at first light, it
 
 A young man swimming across a narrow moonlit-into-dawn strait towards a marble tower on the far shore, where a woman leans from the parapet holding up a light to guide him — the light is a smartphone torch, held exactly the way a person holds a phone. Both continents visible, the water narrow enough to feel crossable. Wide landscape; the swimmer small, the strait dominant. Lower-left is open water.
 
-### 4a. `venues-homer-recital.jpg` — Daytime venues, plenary
+### 4a. `venues-ariadne-thread.jpg` — Daytime venues, registration
+
+Ariadne standing at the threshold of a colonnaded hall, pressing a ball of crimson thread into the open hand of an arriving traveller in drapery; more travellers wait their turn in a switchback queue held by modern retractable-belt barrier posts, the dark tape drawn taut between them. At a marble side table a seated scribe keeps the roll on a long scroll. Late-afternoon light through the columns, the strait beyond. Threshold and queue occupy the right two-thirds; lower-left is open marble floor.
+
+_Not part of the prompt: the thread is the badge — what a delegate is handed at the door so the days ahead can be navigated. It plants the labyrinth two frames before The Choice pays it off, so the crimson must be the eye's first stop. The barrier posts are the scene's one contemporary object; do not let a second one in._
+
+### 4b. `venues-homer-recital.jpg` — Daytime venues, opening ceremony
 
 Blind Homer standing on a low marble dais, mid-recital, one hand raised, before a packed semicircle of seated listeners in drapery who lean forward. Beside him a scribe sits cross-legged transcribing — on an open silver laptop resting on his knees. Amphitheatre setting, columns behind, sea visible through the gap. Lower-left corner is empty marble floor.
 
-### 4b. `venues-judgement-of-paris.jpg` — Daytime venues, parallel sessions
+_Not part of the prompt: this was generated as "the plenary" and now carries the opening ceremony as well — the room is the same room. Not to be regenerated; the prompt is recorded here as it was sent._
+
+### 4c. `venues-judgement-of-paris.jpg` — Daytime venues, parallel sessions
 
 The Judgement of Paris: a young shepherd seated on a rock holding a single golden apple, facing three goddesses standing in a row before three separate doorways, each doorway leading into a different bright interior. He is visibly unable to choose. The three goddesses occupy the right; the apple catches the light. Lower-left is open hillside.
+
+### 4d. `venues-torch-handover.jpg` — Daytime venues, closing ceremony
+
+The passing of the flame at the end of the games: on a low dais at the far end of a great marble hall, a figure in drapery holds out a burning torch while another reaches to take it, the flame caught mid-transfer between their hands. Before them a seated assembly in drapery fills the hall, all turned to watch. A slender chrome microphone stand rises beside the dais. The hall opens at its far end onto the strait at dusk, ships lying at anchor. Dais and assembly occupy the right two-thirds; lower-left is empty marble floor.
+
+_Not part of the prompt: a closing ceremony is a handover — the platform goes to next year's host — which is why the flame is mid-transfer rather than held aloft. The microphone stand is the one contemporary object. Deliberately not the phones, lanyards or suitcases other scenes already spend; the set reads as one collection partly because no anachronism is used twice._
 
 ### 5. `coffee-achilles.jpg` — Coffee breaks
 
@@ -184,14 +198,21 @@ Then watch the join, several times round, before committing. If the last frame d
 
 ## Real photographs — the venue reveal (issue #20)
 
-A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, `diptych` or single `artwork`, not just the scenes below — but only these six are wanted live right now.
+A hung painting can carry a real photograph behind it, gated on file presence exactly like a loop (issue #19; mechanism in `lib/realPhoto.ts` / `lib/availability.ts`). It crossfades in as the viewer scrolls past. The mechanism is scene-kind-agnostic — it applies to any non-cinematic hung painting, a `wall` of any count or a single `artwork`, not just the scenes below — but only these eight are wanted live right now.
 
 - **Filename**: `<same-basename>-real.jpg`, next to the painting's still under `public/artwork/`. No other code change required once the file lands.
 - **Source**: an actual photograph of the real venue, not generated art — this is where the site follows through on showing the venues themselves, not just the myth.
+- **Framing is the whole job.** The photograph replaces the painting inside the same frame, by crossfade, at the same size. Shoot it from a vantage that matches the painting's: the same orientation, the same distance, the subject in the same part of the frame. A photograph framed differently from the painting it covers reads as a cut, not a reveal, and no amount of retouching fixes that afterwards.
+- **Landscape 16:9, at least 2000px wide.** Anything portrait or square gets cropped by `object-fit: cover` and the crop will not be the one you wanted.
+- **Empty rooms.** No recognisable faces: nobody in these photographs has consented the way the sixteen in `docs/adr/0002-ai-generated-oc-portraits.md` did.
 
-### 4a. `venues-homer-recital-real.jpg` — the plenary venue behind The Recital
+### 4a. `venues-ariadne-thread-real.jpg` — the registration desk behind The Thread
 
-### 4b. `venues-judgement-of-paris-real.jpg` — the parallel-session venue behind The Choice
+### 4b. `venues-homer-recital-real.jpg` — the opening-ceremony hall behind The Recital
+
+### 4c. `venues-judgement-of-paris-real.jpg` — the parallel-session rooms behind The Choice
+
+### 4d. `venues-torch-handover-real.jpg` — the closing-ceremony hall behind The Handover
 
 ### 6a. `evenings-intercultural-real.jpg` — the Intercultural Night venue behind The Table
 

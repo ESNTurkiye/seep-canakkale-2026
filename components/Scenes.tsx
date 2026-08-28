@@ -41,7 +41,7 @@ export function GalleryScene({
         <p className={s.galleryBody}>{scene.body}</p>
       </div>
 
-      <div className={`${s.hang} ${scene.artworks.length > 1 ? s.hangTwo : ''}`}>
+      <div className={`${s.hang} ${scene.artworks.length > 1 ? s.hangWall : ''}`}>
         {scene.artworks.map((artwork) => (
           <HungPainting
             key={artwork.src}
