@@ -27,6 +27,21 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: `${event.name} — ${event.platform}`,
   description: `The South-Eastern European Platform comes to Çanakkale, ${event.dateLabel}. Fifteen countries, one strait, four days. Hosted by ${event.hostSection}.`,
+  // Favicon set generated with favicon.io from the SEEP mark. The two-pixel
+  // sizes give crisp tabs everywhere; the .ico keeps old clients happy.
+  // `manifest` drives the PWA-style "Add to Home Screen" icons on mobile.
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
+  manifest: '/site.webmanifest',
+  // Match the browser chrome to the site's ink background, not the accent —
+  // SEEP green is only ever used on dark ground, per the ESN contrast rule.
+  themeColor: '#0f1012',
   openGraph: {
     title: `${event.name}`,
     description: `Fifteen countries, one strait, four days. ${event.dateLabel}.`,
