@@ -24,6 +24,24 @@ export const metadata: Metadata = {
     description: `Fifteen countries, one strait, four days. ${event.dateLabel}.`,
     locale: 'en_GB',
     type: 'website',
+    // The card everyone actually sees: a link to this site is pasted into a
+    // section's WhatsApp group long before anybody opens it, and without an
+    // image that paste is a grey rectangle. Resolved against `metadataBase`
+    // above, because every scraper demands an absolute URL. Issue #6.
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: `${event.name} — ${event.dateLabel}, ${event.city}`,
+      },
+    ],
+  },
+  // Next infers the Twitter card from openGraph, but it infers the small one.
+  // A 1200 x 630 image in a `summary` card is shown as a thumbnail beside the
+  // title; this is the card the image was made for.
+  twitter: {
+    card: 'summary_large_image',
   },
 }
 

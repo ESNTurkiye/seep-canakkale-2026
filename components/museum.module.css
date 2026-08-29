@@ -43,6 +43,48 @@
     radial-gradient(120% 90% at 50% 0%, var(--wall-lit) 0%, var(--wall) 55%, var(--ink) 100%);
 }
 
+/* The curtain (issue #26): the same wall, over everything, before there is
+   anything hanging on it. See Curtain.tsx for what it waits for and why it
+   is this rather than a spinner. */
+.curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background:
+    var(--ink)
+    radial-gradient(120% 90% at 50% 0%, var(--wall-lit) 0%, var(--wall) 55%, var(--ink) 100%);
+  /* The backstop, and the reason the curtain can be in the first paint at
+     all: without it, a visitor whose script never runs would be left looking
+     at a blank wall forever. This lifts on its own, late, with no JavaScript
+     involved — the script's only job is to lift it sooner. */
+  animation: curtainBackstop 700ms ease 2600ms forwards;
+}
+
+.curtainLifting {
+  animation: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 700ms ease;
+}
+
+@keyframes curtainBackstop {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Held, but not faded: a visitor who has asked the site to hold still still
+   gets a composed opening rather than one assembling, and gets it as a cut. */
+@media (prefers-reduced-motion: reduce) {
+  .curtain {
+    animation-duration: 1ms;
+  }
+  .curtainLifting {
+    transition-duration: 1ms;
+  }
+}
+
 /* Carries the viewer between scenes — see InkCrossfade.tsx and issue #15. */
 .inkCrossfade {
   position: absolute;
